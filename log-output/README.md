@@ -1,15 +1,15 @@
 # Log output
 
-Generates a random UUID on startup and prints it with a UTC timestamp every five seconds.
+Generates one UUID on startup, prints it with a UTC timestamp every five seconds, and exposes the current status over HTTP.
 
 ## Run
 
 ```bash
-python app.py
+PORT=8000 python app.py
 ```
 
 ## Build
 
 ```bash
-docker build -t log-output:1.1 .
+docker build -t log-output:1.7 .
 ```

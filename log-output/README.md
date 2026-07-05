@@ -1,9 +1,15 @@
 # Log output
 
-Generates one random UUID when the process starts and prints the same
-value with a UTC timestamp every five seconds.
+Generates a random UUID on startup and prints it with a UTC timestamp every five seconds.
 
-## Run locally
+## Run
 
 ```bash
 python app.py
+```
+
+## Build
+
+```bash
+docker build -t log-output:1.1 .
+```

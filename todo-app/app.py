@@ -40,8 +40,32 @@ def root() -> str:
     <title>Todo App</title>
   </head>
   <body>
-    <h1>Todo App</h1>
-    <img src="/image" alt="Random image" style="max-width: 100%">
+    <main>
+      <h1>Todo App</h1>
+
+      <img
+        src="/image"
+        alt="Random image"
+        style="max-width: 100%"
+      >
+
+      <h2>Add a todo</h2>
+
+      <input
+        type="text"
+        maxlength="140"
+        placeholder="Write a todo"
+        aria-label="Todo"
+      >
+      <button type="button">Send</button>
+
+      <h2>Todos</h2>
+
+      <ul>
+        <li>Learn Kubernetes</li>
+        <li>Build a todo application</li>
+      </ul>
+    </main>
   </body>
 </html>
 """

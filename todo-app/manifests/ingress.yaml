@@ -1,8 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: log-output-ingress
+  name: course-ingress
 spec:
+  ingressClassName: traefik
   rules:
     - http:
         paths:
@@ -17,6 +18,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: log-output-svc
+                name: todo-app-svc
                 port:
                   number: 8000

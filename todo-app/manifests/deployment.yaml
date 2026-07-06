@@ -12,10 +12,19 @@ spec:
       labels:
         app: todo-app
     spec:
+      volumes:
+        - name: image-cache
+          persistentVolumeClaim:
+            claimName: todo-image-claim
       containers:
         - name: todo-app
-          image: todo-app:1.4
+          image: todo-app:1.12
           imagePullPolicy: IfNotPresent
           env:
             - name: PORT
               value: "8000"
+            - name: IMAGE_FILE
+              value: /usr/src/app/files/image.jpg
+          volumeMounts:
+            - name: image-cache
+              mountPath: /usr/src/app/files

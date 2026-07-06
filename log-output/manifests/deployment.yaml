@@ -13,11 +13,12 @@ spec:
         app: log-output
     spec:
       volumes:
-        - name: shared-output
-          emptyDir: {}
+        - name: shared-data
+          persistentVolumeClaim:
+            claimName: shared-data-claim
       containers:
         - name: log-output-writer
-          image: log-output:1.10
+          image: log-output:1.11
           imagePullPolicy: IfNotPresent
           command:
             - python
@@ -26,11 +27,11 @@ spec:
             - name: OUTPUT_FILE
               value: /usr/src/app/files/output.txt
           volumeMounts:
-            - name: shared-output
+            - name: shared-data
               mountPath: /usr/src/app/files
 
         - name: log-output-reader
-          image: log-output:1.10
+          image: log-output:1.11
           imagePullPolicy: IfNotPresent
           command:
             - python
@@ -43,6 +44,8 @@ spec:
               value: "8000"
             - name: OUTPUT_FILE
               value: /usr/src/app/files/output.txt
+            - name: PING_PONG_FILE
+              value: /usr/src/app/files/ping-pong.txt
           volumeMounts:
-            - name: shared-output
+            - name: shared-data
               mountPath: /usr/src/app/files

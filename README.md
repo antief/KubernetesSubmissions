@@ -26,3 +26,4 @@
 - [2.4](https://github.com/antief/KubernetesSubmissions/tree/2.4) ([todo-app](https://github.com/antief/KubernetesSubmissions/tree/2.4/todo-app), [todo-backend](https://github.com/antief/KubernetesSubmissions/tree/2.4/todo-backend), [namespaces](https://github.com/antief/KubernetesSubmissions/tree/2.4/namespaces))
 - [2.5](https://github.com/antief/KubernetesSubmissions/tree/2.5) ([log-output](https://github.com/antief/KubernetesSubmissions/tree/2.5/log-output))
 - [2.6](https://github.com/antief/KubernetesSubmissions/tree/2.6) ([todo-app](https://github.com/antief/KubernetesSubmissions/tree/2.6/todo-app), [todo-backend](https://github.com/antief/KubernetesSubmissions/tree/2.6/todo-backend))
+- [2.7](https://github.com/antief/KubernetesSubmissions/tree/2.7) ([ping-pong](https://github.com/antief/KubernetesSubmissions/tree/2.7/ping-pong))

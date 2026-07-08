@@ -19,18 +19,36 @@ spec:
             claimName: todo-image-claim
       containers:
         - name: todo-app
-          image: todo-app:2.2
+          image: todo-app:2.6
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8000
           env:
+            - name: HOST
+              value: 0.0.0.0
+
             - name: PORT
               value: "8000"
+
             - name: IMAGE_FILE
               value: /usr/src/app/files/image.jpg
+
+            - name: IMAGE_URL
+              value: https://picsum.photos/1200
+
+            - name: IMAGE_CACHE_SECONDS
+              value: "600"
+
+            - name: IMAGE_REQUEST_TIMEOUT_SECONDS
+              value: "30"
+
             - name: TODO_BACKEND_URL
               value: http://todo-backend-svc:8000
+
+            - name: BACKEND_REQUEST_TIMEOUT_SECONDS
+              value: "5"
+
           volumeMounts:
             - name: image-cache
               mountPath: /usr/src/app/files

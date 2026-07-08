@@ -6,10 +6,12 @@ The form accepts todos of at most 140 characters. Todo items are fetched from th
 
 The application is deployed to the `project` namespace.
 
+Runtime URLs, ports, paths and timeout values are passed to the Pod as environment variables in the Deployment.
+
 ## Build
 
 ```bash
-docker build -t todo-app:2.2 .
+docker build -t todo-app:2.6 .
 ```
 
 ## Deploy to k3d
@@ -23,12 +25,12 @@ docker exec \
   k3d-k3s-default-agent-0 \
   mkdir -p /tmp/todo-image
 
-docker build -t todo-app:2.2 ./todo-app
-docker build -t todo-backend:2.2 ./todo-backend
+docker build -t todo-app:2.6 ./todo-app
+docker build -t todo-backend:2.6 ./todo-backend
 
 k3d image import \
-  todo-app:2.2 \
-  todo-backend:2.2 \
+  todo-app:2.6 \
+  todo-backend:2.6 \
   -c k3s-default
 
 kubectl apply \

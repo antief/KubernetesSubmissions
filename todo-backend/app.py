@@ -5,6 +5,10 @@ from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
 
 
+HOST = os.environ["HOST"]
+PORT = int(os.environ["PORT"])
+
+
 class TodoCreate(BaseModel):
     content: str = Field(min_length=1, max_length=140)
 
@@ -41,5 +45,4 @@ def create_todo(todo: TodoCreate) -> str:
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", "8000"))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host=HOST, port=PORT)

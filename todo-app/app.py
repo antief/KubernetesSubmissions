@@ -11,15 +11,19 @@ from fastapi import FastAPI, Form, HTTPException, status
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 
-IMAGE_FILE = Path(
-    os.getenv("IMAGE_FILE", "/usr/src/app/files/image.jpg")
-)
-IMAGE_URL = "https://picsum.photos/1200"
-CACHE_SECONDS = 600
+HOST = os.environ["HOST"]
+PORT = int(os.environ["PORT"])
 
-TODO_BACKEND_URL = os.getenv(
-    "TODO_BACKEND_URL",
-    "http://todo-backend-svc:8000",
+IMAGE_FILE = Path(os.environ["IMAGE_FILE"])
+IMAGE_URL = os.environ["IMAGE_URL"]
+IMAGE_CACHE_SECONDS = int(os.environ["IMAGE_CACHE_SECONDS"])
+IMAGE_REQUEST_TIMEOUT_SECONDS = float(
+    os.environ["IMAGE_REQUEST_TIMEOUT_SECONDS"]
+)
+
+TODO_BACKEND_URL = os.environ["TODO_BACKEND_URL"].rstrip("/")
+BACKEND_REQUEST_TIMEOUT_SECONDS = float(
+    os.environ["BACKEND_REQUEST_TIMEOUT_SECONDS"]
 )
 
 app = FastAPI()
@@ -28,20 +32,24 @@ app = FastAPI()
 def update_image() -> None:
     if (
         IMAGE_FILE.exists()
-        and time.time() - IMAGE_FILE.stat().st_mtime < CACHE_SECONDS
+        and time.time() - IMAGE_FILE.stat().st_mtime
+        < IMAGE_CACHE_SECONDS
     ):
         return
 
     IMAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    with urlopen(IMAGE_URL, timeout=30) as response:
+    with urlopen(
+        IMAGE_URL,
+        timeout=IMAGE_REQUEST_TIMEOUT_SECONDS,
+    ) as response:
         IMAGE_FILE.write_bytes(response.read())
 
 
 def fetch_todos() -> list[str]:
     with urlopen(
         f"{TODO_BACKEND_URL}/todos",
-        timeout=5,
+        timeout=BACKEND_REQUEST_TIMEOUT_SECONDS,
     ) as response:
         return json.load(response)
 
@@ -56,7 +64,10 @@ def send_todo(content: str) -> None:
         method="POST",
     )
 
-    with urlopen(request, timeout=5) as response:
+    with urlopen(
+        request,
+        timeout=BACKEND_REQUEST_TIMEOUT_SECONDS,
+    ) as response:
         response.read()
 
 
@@ -139,6 +150,5 @@ def image() -> FileResponse:
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", "8000"))
-    print(f"Server started in port {port}", flush=True)
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    print(f"Server started in port {PORT}", flush=True)
+    uvicorn.run(app, host=HOST, port=PORT)

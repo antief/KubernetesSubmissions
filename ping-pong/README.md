@@ -7,6 +7,8 @@ Provides two HTTP endpoints:
 
 The counter is kept in memory and resets when the Pod restarts.
 
+The application is deployed to the `exercises` namespace.
+
 ## Run locally
 
 ```bash
@@ -24,8 +26,15 @@ docker build -t ping-pong:2.1 .
 From the repository root:
 
 ```bash
+kubectl apply -f namespaces/exercises.yaml
 k3d image import ping-pong:2.1 -c k3s-default
 kubectl apply -f ping-pong/manifests/
 ```
 
-The Ping-pong endpoint is available through the course ingress at <http://localhost:8081/pingpong>.
+Inspect the resources:
+
+```bash
+kubectl get pods,services,ingress -n exercises
+```
+
+The endpoint is available at <http://localhost:8081/pingpong>.

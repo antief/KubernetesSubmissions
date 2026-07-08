@@ -7,6 +7,8 @@ The application runs as two containers in a single Kubernetes Pod.
 - The containers share the log file through an `emptyDir` volume.
 - The reader fetches the Ping-pong counter over HTTP from `ping-pong-svc`.
 
+The application is deployed to the `exercises` namespace.
+
 ## Run locally
 
 Create a virtual environment and install the dependencies:
@@ -33,8 +35,6 @@ PORT=8000 \
 python app.py
 ```
 
-Open <http://localhost:8000>.
-
 ## Build
 
 ```bash
@@ -46,8 +46,13 @@ docker build -t log-output:2.1 .
 From the repository root:
 
 ```bash
+kubectl apply -f namespaces/exercises.yaml
 k3d image import log-output:2.1 -c k3s-default
 kubectl apply -f log-output/manifests/
 ```
 
-The application is available through the course ingress at <http://localhost:8081/>.
+Inspect the resources:
+
+```bash
+kubectl get pods,services -n exercises
+```

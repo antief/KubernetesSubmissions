@@ -1,44 +1,36 @@
 # Todo backend
 
-Stores todos in memory and exposes two HTTP endpoints:
+FastAPI backend for the Todo application. Todos are stored in PostgreSQL.
 
-- `GET /todos` returns all todos.
-- `POST /todos` creates a todo.
-
-The in-memory data resets when the Pod restarts.
-
-The application is deployed to the `project` namespace and is accessed internally through `todo-backend-svc`.
-
-The bind address and port are passed to the Pod as environment variables in the Deployment.
+PostgreSQL runs as a single-replica StatefulSet. Database settings are provided through a ConfigMap and a SOPS-encrypted Secret.
 
 ## Build
 
 ```bash
-docker build -t todo-backend:2.6 .
+docker build -t todo-backend:2.8 ./todo-backend
 ```
 
-## Deploy to k3d
-
-From the repository root:
+## Deploy
 
 ```bash
 kubectl apply -f namespaces/project.yaml
 
-docker build \
-  -t todo-backend:2.6 \
-  ./todo-backend
+docker pull postgres:18.0
 
 k3d image import \
-  todo-backend:2.6 \
+  todo-backend:2.8 \
+  postgres:18.0 \
   -c k3s-default
 
+export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
+
+sops --decrypt \
+  todo-backend/manifests/secret.enc.yaml \
+  | kubectl apply -f -
+
 kubectl apply \
-  -f todo-backend/manifests/
-```
-
-Inspect the resources:
-
-```bash
-kubectl get deployments,pods,services \
-  -n project
+  -f todo-backend/manifests/configmap.yaml \
+  -f todo-backend/manifests/postgres.yaml \
+  -f todo-backend/manifests/deployment.yaml \
+  -f todo-backend/manifests/service.yaml
 ```

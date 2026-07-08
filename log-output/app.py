@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.request import urlopen
 
 import uvicorn
 from fastapi import FastAPI
@@ -10,8 +11,9 @@ OUTPUT_FILE = Path(
     os.getenv("OUTPUT_FILE", "/usr/src/app/files/output.txt")
 )
 
-PING_PONG_FILE = Path(
-    os.getenv("PING_PONG_FILE", "/usr/src/app/files/ping-pong.txt")
+PING_PONG_URL = os.getenv(
+    "PING_PONG_URL",
+    "http://ping-pong-svc:8000/pings",
 )
 
 app = FastAPI()
@@ -30,10 +32,8 @@ def latest_log_line() -> str:
 
 
 def ping_pong_count() -> int:
-    try:
-        return int(PING_PONG_FILE.read_text(encoding="utf-8").strip())
-    except FileNotFoundError:
-        return 0
+    with urlopen(PING_PONG_URL, timeout=5) as response:
+        return int(response.read().decode("utf-8").strip())
 
 
 @app.get("/", response_class=PlainTextResponse)

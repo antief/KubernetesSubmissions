@@ -17,3 +17,4 @@
 - [1.11](https://github.com/antief/KubernetesSubmissions/tree/1.11) ([log-output](https://github.com/antief/KubernetesSubmissions/tree/1.11/log-output), [ping-pong](https://github.com/antief/KubernetesSubmissions/tree/1.11/ping-pong), [storage](https://github.com/antief/KubernetesSubmissions/tree/1.11/storage))
 - [1.12](https://github.com/antief/KubernetesSubmissions/tree/1.12/todo-app)
 - [1.13](https://github.com/antief/KubernetesSubmissions/tree/1.13/todo-app)
+- [2.1](https://github.com/antief/KubernetesSubmissions/tree/2.1) ([log-output](https://github.com/antief/KubernetesSubmissions/tree/2.1/log-output), [ping-pong](https://github.com/antief/KubernetesSubmissions/tree/2.1/ping-pong))

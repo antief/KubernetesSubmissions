@@ -1,20 +1,22 @@
 # Ping-pong
 
-Responds to `/pingpong` with a request counter.
+Provides two HTTP endpoints:
 
-The counter is stored in a file on a persistent volume shared with the Log output application.
+- `GET /pingpong` returns the current counter and increments it.
+- `GET /pings` returns the current counter without modifying it.
+
+The counter is kept in memory and resets when the Pod restarts.
 
 ## Run locally
 
 ```bash
-mkdir -p /tmp/ping-pong
-COUNTER_FILE=/tmp/ping-pong/ping-pong.txt PORT=8000 python app.py
+PORT=8001 python app.py
 ```
 
 ## Build
 
 ```bash
-docker build -t ping-pong:1.11 .
+docker build -t ping-pong:2.1 .
 ```
 
 ## Deploy to k3d
@@ -22,7 +24,8 @@ docker build -t ping-pong:1.11 .
 From the repository root:
 
 ```bash
-k3d image import ping-pong:1.11 -c k3s-default
-kubectl apply -f storage/
+k3d image import ping-pong:2.1 -c k3s-default
 kubectl apply -f ping-pong/manifests/
 ```
+
+The Ping-pong endpoint is available through the course ingress at <http://localhost:8081/pingpong>.

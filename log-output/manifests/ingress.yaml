@@ -18,6 +18,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: todo-app-svc
+                name: log-output-svc
                 port:
                   number: 8000

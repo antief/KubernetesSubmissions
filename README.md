@@ -28,3 +28,4 @@
 - [2.6](https://github.com/antief/KubernetesSubmissions/tree/2.6) ([todo-app](https://github.com/antief/KubernetesSubmissions/tree/2.6/todo-app), [todo-backend](https://github.com/antief/KubernetesSubmissions/tree/2.6/todo-backend))
 - [2.7](https://github.com/antief/KubernetesSubmissions/tree/2.7) ([ping-pong](https://github.com/antief/KubernetesSubmissions/tree/2.7/ping-pong))
 - [2.8](https://github.com/antief/KubernetesSubmissions/tree/2.8) ([todo-backend](https://github.com/antief/KubernetesSubmissions/tree/2.8/todo-backend))
+- [2.9](https://github.com/antief/KubernetesSubmissions/tree/2.9) ([todo-backend](https://github.com/antief/KubernetesSubmissions/tree/2.9/todo-backend))

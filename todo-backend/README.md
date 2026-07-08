@@ -2,6 +2,8 @@
 
 FastAPI backend for the Todo application. Todos are stored in PostgreSQL.
 
+A CronJob creates an hourly todo for a random Wikipedia article.
+
 PostgreSQL runs as a single-replica StatefulSet. Database settings are provided through a ConfigMap and a SOPS-encrypted Secret.
 
 ## Build
@@ -32,5 +34,6 @@ kubectl apply \
   -f todo-backend/manifests/configmap.yaml \
   -f todo-backend/manifests/postgres.yaml \
   -f todo-backend/manifests/deployment.yaml \
-  -f todo-backend/manifests/service.yaml
+  -f todo-backend/manifests/service.yaml \
+  -f todo-backend/manifests/cronjob.yaml
 ```

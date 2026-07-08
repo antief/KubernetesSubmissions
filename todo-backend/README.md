@@ -1,6 +1,6 @@
 # Todo backend
 
-FastAPI backend for the Todo application. Todos are stored in PostgreSQL.
+FastAPI backend for the Todo application. Todos are stored in PostgreSQL. Todo requests are logged, and todos longer than 140 characters are rejected.
 
 A CronJob creates an hourly todo for a random Wikipedia article.
 
@@ -9,7 +9,7 @@ PostgreSQL runs as a single-replica StatefulSet. Database settings are provided 
 ## Build
 
 ```bash
-docker build -t todo-backend:2.8 ./todo-backend
+docker build -t todo-backend:2.10 ./todo-backend
 ```
 
 ## Deploy
@@ -20,7 +20,7 @@ kubectl apply -f namespaces/project.yaml
 docker pull postgres:18.0
 
 k3d image import \
-  todo-backend:2.8 \
+  todo-backend:2.10 \
   postgres:18.0 \
   -c k3s-default
 

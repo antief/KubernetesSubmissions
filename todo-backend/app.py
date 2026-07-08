@@ -1,10 +1,11 @@
+import logging
 import os
 from contextlib import asynccontextmanager
 
 import psycopg
 import uvicorn
-from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, HTTPException, Request, status
+from pydantic import BaseModel, Field, ValidationError
 
 
 HOST = os.environ["HOST"]
@@ -15,6 +16,12 @@ POSTGRES_PORT = int(os.environ["POSTGRES_PORT"])
 POSTGRES_DB = os.environ["POSTGRES_DB"]
 POSTGRES_USER = os.environ["POSTGRES_USER"]
 POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
+logger = logging.getLogger("todo-backend")
 
 
 class TodoCreate(BaseModel):
@@ -89,10 +96,31 @@ def get_todos() -> list[str]:
     response_model=str,
     status_code=status.HTTP_201_CREATED,
 )
-def create_todo(todo: TodoCreate) -> str:
+async def create_todo(request: Request) -> str:
+    payload = await request.json()
+    raw_content = payload.get("content")
+
+    logger.info("todo_request content=%r", raw_content)
+
+    try:
+        todo = TodoCreate.model_validate(payload)
+    except ValidationError as error:
+        logger.warning(
+            "todo_rejected content=%r reason=validation_error",
+            raw_content,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=error.errors(),
+        ) from error
+
     content = todo.content.strip()
 
     if not content:
+        logger.warning(
+            "todo_rejected content=%r reason=empty",
+            raw_content,
+        )
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Todo must not be empty",
@@ -106,6 +134,8 @@ def create_todo(todo: TodoCreate) -> str:
             """,
             (content,),
         )
+
+    logger.info("todo_created content=%r", content)
 
     return content
 

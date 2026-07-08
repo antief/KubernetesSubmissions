@@ -43,7 +43,7 @@ spec:
 
       containers:
         - name: todo-backend
-          image: todo-backend:2.8
+          image: todo-backend:2.10
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

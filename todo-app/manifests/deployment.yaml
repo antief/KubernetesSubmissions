@@ -18,13 +18,18 @@ spec:
             claimName: todo-image-claim
       containers:
         - name: todo-app
-          image: todo-app:1.13
+          image: todo-app:2.2
           imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
           env:
             - name: PORT
               value: "8000"
             - name: IMAGE_FILE
               value: /usr/src/app/files/image.jpg
+            - name: TODO_BACKEND_URL
+              value: http://todo-backend-svc:8000
           volumeMounts:
             - name: image-cache
               mountPath: /usr/src/app/files

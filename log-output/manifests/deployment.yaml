@@ -16,9 +16,17 @@ spec:
       volumes:
         - name: log-data
           emptyDir: {}
+
+        - name: app-config
+          configMap:
+            name: log-output-config
+            items:
+              - key: information.txt
+                path: information.txt
+
       containers:
         - name: log-output-writer
-          image: log-output:2.1
+          image: log-output:2.5
           imagePullPolicy: IfNotPresent
           command:
             - python
@@ -31,7 +39,7 @@ spec:
               mountPath: /usr/src/app/files
 
         - name: log-output-reader
-          image: log-output:2.1
+          image: log-output:2.5
           imagePullPolicy: IfNotPresent
           command:
             - python
@@ -42,10 +50,23 @@ spec:
           env:
             - name: PORT
               value: "8000"
+
             - name: OUTPUT_FILE
               value: /usr/src/app/files/output.txt
+
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-output-config
+                  key: MESSAGE
+
             - name: PING_PONG_URL
               value: http://ping-pong-svc:8000/pings
+
           volumeMounts:
             - name: log-data
               mountPath: /usr/src/app/files
+
+            - name: app-config
+              mountPath: /usr/src/app/config
+              readOnly: true

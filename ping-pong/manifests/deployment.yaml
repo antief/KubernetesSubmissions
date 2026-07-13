@@ -15,7 +15,7 @@ spec:
     spec:
       initContainers:
         - name: wait-for-postgres
-          image: postgres:18.0
+          image: docker.io/library/postgres:18.0
           command:
             - sh
             - -c
@@ -30,7 +30,7 @@ spec:
 
       containers:
         - name: ping-pong
-          image: ping-pong:2.7
+          image: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:3.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

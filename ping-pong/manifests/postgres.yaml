@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:18.0
+          image: docker.io/library/postgres:18.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: postgres
@@ -64,7 +64,6 @@ spec:
       spec:
         accessModes:
           - ReadWriteOnce
-        storageClassName: local-path
         resources:
           requests:
             storage: 100Mi

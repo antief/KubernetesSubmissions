@@ -39,6 +39,11 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+@app.get("/", response_class=PlainTextResponse)
+def health() -> str:
+    return "ok"
+
+
 @app.get("/pingpong", response_class=PlainTextResponse)
 def ping_pong() -> str:
     with psycopg.connect(DATABASE_URL) as connection:

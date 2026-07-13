@@ -30,7 +30,7 @@ spec:
 
       containers:
         - name: ping-pong
-          image: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:3.1
+          image: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:3.2
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

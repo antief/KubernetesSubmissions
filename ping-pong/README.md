@@ -80,8 +80,9 @@ kubectl exec \
 
 ## Deploy to GKE
 
-Ping-pong is deployed together with Log output behind the Ingress defined
-in `log-output/manifests/ingress.yaml`.
+Ping-pong is deployed together with Log output through the Gateway and
+HTTPRoute defined in `log-output/manifests/gateway.yaml` and
+`log-output/manifests/httproute.yaml`.
 
 See the [Log output deployment instructions](../log-output/README.md#deploy-to-gke)
 for the combined GKE deployment and functional tests.

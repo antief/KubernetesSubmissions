@@ -32,7 +32,9 @@ k3d image import \
   -c k3s-default
 
 kubectl apply \
-  -f log-output/manifests/
+  -f log-output/manifests/configmap.yaml \
+  -f log-output/manifests/deployment.yaml \
+  -f log-output/manifests/service.yaml
 ```
 
 Inspect the resources:
@@ -62,24 +64,15 @@ with urlopen(
 
 ## Deploy to GKE
 
-Ping-pong and Log output are exposed through one GKE Ingress. The
-application images are stored in Google Artifact Registry.
+Ping-pong and Log output are exposed through one GKE Gateway and
+HTTPRoute. The cluster must use the standard Gateway API channel.
 
 From the repository root:
 
 ```bash
-export REGISTRY="europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images"
-
-docker build \
-  -t "${REGISTRY}/ping-pong:3.2" \
-  ./ping-pong
-
-docker build \
-  -t "${REGISTRY}/log-output:2.5" \
-  ./log-output
-
-docker push "${REGISTRY}/ping-pong:3.2"
-docker push "${REGISTRY}/log-output:2.5"
+gcloud container clusters update dwk-cluster \
+  --location=europe-north1-b \
+  --gateway-api=standard
 
 kubectl apply -f namespaces/exercises.yaml
 
@@ -90,7 +83,12 @@ kubectl apply \
   -f log-output/manifests/configmap.yaml \
   -f log-output/manifests/deployment.yaml \
   -f log-output/manifests/service.yaml \
-  -f log-output/manifests/ingress.yaml
+  -f log-output/manifests/gateway.yaml \
+  -f log-output/manifests/httproute.yaml
+
+kubectl delete ingress log-output-ingress \
+  -n exercises \
+  --ignore-not-found
 
 kubectl rollout status \
   deployment/ping-pong-dep \
@@ -99,25 +97,23 @@ kubectl rollout status \
 kubectl rollout status \
   deployment/log-output-dep \
   -n exercises
-```
 
-Wait for the Ingress address:
-
-```bash
-kubectl get ingress log-output-ingress \
+kubectl wait \
+  --for=condition=Programmed \
+  gateway/log-output-gateway \
   -n exercises \
-  --watch
+  --timeout=30m
 ```
 
 Test both routes:
 
 ```bash
-INGRESS_IP="$(
-  kubectl get ingress log-output-ingress \
+GATEWAY_IP="$(
+  kubectl get gateway log-output-gateway \
     -n exercises \
-    -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    -o jsonpath='{.status.addresses[0].value}'
 )"
 
-curl --fail --show-error "http://${INGRESS_IP}/"
-curl --fail --show-error "http://${INGRESS_IP}/pingpong"
+curl --fail --show-error "http://${GATEWAY_IP}/"
+curl --fail --show-error "http://${GATEWAY_IP}/pingpong"
 ```

@@ -65,7 +65,9 @@ with urlopen(
 ## Deploy to GKE
 
 Ping-pong and Log output are exposed through one GKE Gateway and
-HTTPRoute. The cluster must use the standard Gateway API channel.
+HTTPRoute. Requests to `/pingpong` are rewritten to `/` before being
+forwarded to Ping-pong. The cluster must use the standard Gateway API
+channel.
 
 From the repository root:
 

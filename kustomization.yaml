@@ -4,7 +4,6 @@ kind: Kustomization
 namespace: project
 
 resources:
-  - namespaces/project.yaml
   - todo-backend/manifests/configmap.yaml
   - todo-backend/manifests/postgres.yaml
   - todo-backend/manifests/deployment.yaml

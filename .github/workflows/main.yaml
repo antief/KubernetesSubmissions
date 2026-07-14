@@ -2,6 +2,8 @@ name: Release application
 
 on:
   push:
+    branches:
+      - "**"
 
 permissions:
   contents: read
@@ -50,6 +52,14 @@ jobs:
           project_id: "${{ env.PROJECT_ID }}"
           location: "${{ env.GKE_ZONE }}"
 
+      - name: Select namespace
+        run: |
+          if [[ "$BRANCH" == "main" ]]; then
+            echo "NAMESPACE=project" >> "$GITHUB_ENV"
+          else
+            echo "NAMESPACE=$BRANCH" >> "$GITHUB_ENV"
+          fi
+
       - name: Form image names
         run: |
           echo "TODO_APP_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/$TODO_APP_IMAGE:$BRANCH-$GITHUB_SHA" >> "$GITHUB_ENV"
@@ -69,20 +79,39 @@ jobs:
         uses: imranismail/setup-kustomize@v3
 
       - name: Deploy
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
+          kubectl create namespace "$NAMESPACE" \
+            --dry-run=client \
+            --output yaml \
+            | kubectl apply -f -
+
+          kubectl config set-context \
+            --current \
+            --namespace="$NAMESPACE"
+
+          kubectl create secret generic todo-postgres-secret \
+            --namespace "$NAMESPACE" \
+            --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            --dry-run=client \
+            --output yaml \
+            | kubectl apply -f -
+
+          kustomize edit set namespace "$NAMESPACE"
           kustomize edit set image todo-app="$TODO_APP_TAG"
           kustomize edit set image todo-backend="$TODO_BACKEND_TAG"
 
           kustomize build . | kubectl apply -f -
 
           kubectl rollout status deployment "$TODO_BACKEND_DEPLOYMENT" \
-            --namespace project \
+            --namespace "$NAMESPACE" \
             --timeout=300s
 
           kubectl rollout status deployment "$TODO_APP_DEPLOYMENT" \
-            --namespace project \
+            --namespace "$NAMESPACE" \
             --timeout=300s
 
           kubectl get services \
-            --namespace project \
+            --namespace "$NAMESPACE" \
             --output wide

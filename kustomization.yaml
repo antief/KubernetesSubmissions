@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: project
+
+resources:
+  - namespaces/project.yaml
+  - todo-backend/manifests/configmap.yaml
+  - todo-backend/manifests/postgres.yaml
+  - todo-backend/manifests/deployment.yaml
+  - todo-backend/manifests/service.yaml
+  - todo-backend/manifests/cronjob.yaml
+  - todo-app/manifests/persistentvolumeclaim.yaml
+  - todo-app/manifests/deployment.yaml
+  - todo-app/manifests/service.yaml
+
+images:
+  - name: todo-app
+    newName: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/todo-app
+    newTag: "2.6"
+
+  - name: todo-backend
+    newName: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/todo-backend
+    newTag: "2.10"
+
+patches:
+  - target:
+      kind: Service
+      name: todo-app-svc
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: LoadBalancer
+
+  - target:
+      kind: PersistentVolumeClaim
+      name: todo-image-claim
+    patch: |-
+      - op: remove
+        path: /spec/storageClassName
+
+  - target:
+      kind: StatefulSet
+      name: todo-postgres
+    patch: |-
+      - op: remove
+        path: /spec/volumeClaimTemplates/0/spec/storageClassName

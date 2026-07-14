@@ -40,3 +40,4 @@
 - [3.5](https://github.com/antief/KubernetesSubmissions/tree/3.5)
 - [3.6](https://github.com/antief/KubernetesSubmissions/tree/3.6) ([workflow](https://github.com/antief/KubernetesSubmissions/tree/3.6/.github/workflows), [todo-app](https://github.com/antief/KubernetesSubmissions/tree/3.6/todo-app))
 - [3.7](https://github.com/antief/KubernetesSubmissions/tree/3.7) ([workflow](https://github.com/antief/KubernetesSubmissions/tree/3.7/.github/workflows))
+- [3.8](https://github.com/antief/KubernetesSubmissions/tree/3.8) ([workflow](https://github.com/antief/KubernetesSubmissions/tree/3.8/.github/workflows))

@@ -38,3 +38,4 @@
 - [3.3](https://github.com/antief/KubernetesSubmissions/tree/3.3) ([log-output](https://github.com/antief/KubernetesSubmissions/tree/3.3/log-output), [ping-pong](https://github.com/antief/KubernetesSubmissions/tree/3.3/ping-pong))
 - [3.4](https://github.com/antief/KubernetesSubmissions/tree/3.4) ([log-output](https://github.com/antief/KubernetesSubmissions/tree/3.4/log-output), [ping-pong](https://github.com/antief/KubernetesSubmissions/tree/3.4/ping-pong))
 - [3.5](https://github.com/antief/KubernetesSubmissions/tree/3.5)
+- [3.6](https://github.com/antief/KubernetesSubmissions/tree/3.6) ([workflow](https://github.com/antief/KubernetesSubmissions/tree/3.6/.github/workflows), [todo-app](https://github.com/antief/KubernetesSubmissions/tree/3.6/todo-app))

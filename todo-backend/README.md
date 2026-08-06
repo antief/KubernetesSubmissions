@@ -74,3 +74,7 @@ kubectl apply \
 - High availability is not provided by a single PostgreSQL Pod and persistent volume.
 
 For this course project, self-hosted PostgreSQL is a reasonable and inexpensive choice. For a production service where availability and recovery are important, a managed database would reduce the amount of maintenance required.
+
+## Exercise 3.12: GKE application logs
+
+![Todo creation log in GKE Logs Explorer](images/3.12-todo-created-log.png)

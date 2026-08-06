@@ -44,3 +44,4 @@
 - [3.9](https://github.com/antief/KubernetesSubmissions/tree/3.9) ([todo-backend](https://github.com/antief/KubernetesSubmissions/tree/3.9/todo-backend))
 - [3.10](https://github.com/antief/KubernetesSubmissions/tree/3.10) ([todo-backend](https://github.com/antief/KubernetesSubmissions/tree/3.10/todo-backend))
 - [3.11](https://github.com/antief/KubernetesSubmissions/tree/3.11) ([todo-app](https://github.com/antief/KubernetesSubmissions/tree/3.11/todo-app), [todo-backend](https://github.com/antief/KubernetesSubmissions/tree/3.11/todo-backend))
+- [3.12](https://github.com/antief/KubernetesSubmissions/tree/3.12) ([todo-backend](https://github.com/antief/KubernetesSubmissions/tree/3.12/todo-backend))

@@ -31,6 +31,14 @@ spec:
               image: postgres:18.0
               imagePullPolicy: IfNotPresent
 
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+
               envFrom:
                 - configMapRef:
                     name: todo-postgres-config
@@ -60,6 +68,14 @@ spec:
             - name: upload-backup
               image: gcr.io/google.com/cloudsdktool/google-cloud-cli:579.0.0-stable
               imagePullPolicy: IfNotPresent
+
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
 
               env:
                 - name: GOOGLE_APPLICATION_CREDENTIALS

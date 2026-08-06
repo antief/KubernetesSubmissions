@@ -18,6 +18,14 @@ spec:
           image: postgres:18.0
           imagePullPolicy: IfNotPresent
 
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+
           envFrom:
             - configMapRef:
                 name: todo-postgres-config
@@ -45,6 +53,15 @@ spec:
         - name: todo-backend
           image: todo-backend:2.10
           imagePullPolicy: IfNotPresent
+
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+
           ports:
             - name: http
               containerPort: 8000

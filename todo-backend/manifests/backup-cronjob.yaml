@@ -1,0 +1,91 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: todo-database-backup
+  namespace: project
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+
+      template:
+        spec:
+          restartPolicy: OnFailure
+
+          volumes:
+            - name: backup
+              emptyDir: {}
+
+            - name: storage-key
+              secret:
+                secretName: storage-sa-key
+                defaultMode: 0400
+
+          initContainers:
+            - name: pg-dump
+              image: postgres:18.0
+              imagePullPolicy: IfNotPresent
+
+              envFrom:
+                - configMapRef:
+                    name: todo-postgres-config
+
+                - secretRef:
+                    name: todo-postgres-secret
+
+              command:
+                - sh
+                - -c
+                - |
+                  backup="/backup/todo-$(date -u +%Y-%m-%dT%H-%M-%SZ).sql"
+
+                  PGPASSWORD="$POSTGRES_PASSWORD" pg_dump \
+                    --host="$POSTGRES_HOST" \
+                    --port="$POSTGRES_PORT" \
+                    --username="$POSTGRES_USER" \
+                    --dbname="$POSTGRES_DB" \
+                    --file="$backup" \
+                    && printf '%s' "$backup" > /backup/filename
+
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+
+          containers:
+            - name: upload-backup
+              image: gcr.io/google.com/cloudsdktool/google-cloud-cli:579.0.0-stable
+              imagePullPolicy: IfNotPresent
+
+              env:
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: /var/run/secrets/google/key.json
+
+                - name: GCS_BUCKET
+                  value: dwk-gke-antti-6c49-todo-backups
+
+                - name: CLOUDSDK_CORE_DISABLE_PROMPTS
+                  value: "1"
+
+              command:
+                - sh
+                - -c
+                - |
+                  backup="$(cat /backup/filename)" \
+                    && gcloud auth activate-service-account \
+                      --key-file="$GOOGLE_APPLICATION_CREDENTIALS" \
+                    && gcloud storage cp \
+                      "$backup" \
+                      "gs://${GCS_BUCKET}/$(basename "$backup")"
+
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+
+                - name: storage-key
+                  mountPath: /var/run/secrets/google
+                  readOnly: true

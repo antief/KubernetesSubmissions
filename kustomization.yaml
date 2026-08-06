@@ -9,6 +9,7 @@ resources:
   - todo-backend/manifests/deployment.yaml
   - todo-backend/manifests/service.yaml
   - todo-backend/manifests/cronjob.yaml
+  - todo-backend/manifests/backup-cronjob.yaml
   - todo-app/manifests/persistentvolumeclaim.yaml
   - todo-app/manifests/deployment.yaml
   - todo-app/manifests/service.yaml

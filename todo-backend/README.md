@@ -2,7 +2,7 @@
 
 FastAPI backend for the Todo application. Todos are stored in PostgreSQL. Todo requests are logged, and todos longer than 140 characters are rejected.
 
-A CronJob creates an hourly todo for a random Wikipedia article.
+A CronJob creates an hourly todo for a random Wikipedia article. A separate daily CronJob backs up PostgreSQL to Google Cloud Storage.
 
 PostgreSQL runs as a single-replica StatefulSet. Database settings are provided through a ConfigMap and a SOPS-encrypted Secret.
 

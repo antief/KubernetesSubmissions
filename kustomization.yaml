@@ -17,7 +17,7 @@ resources:
 images:
   - name: todo-app
     newName: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/todo-app
-    newTag: "4.2"
+    newTag: "4.2-system-failure-v2"
 
   - name: todo-backend
     newName: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/todo-backend

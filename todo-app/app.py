@@ -85,11 +85,43 @@ def break_backend() -> None:
         response.read()
 
 
-@app.get("/", response_class=HTMLResponse)
-def root() -> str:
+def system_failure_response() -> HTMLResponse:
+    return HTMLResponse(
+        content="""<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>System Failure</title>
+  </head>
+  <body>
+    <main>
+      <h1>System Failure</h1>
+      <p>
+        The Todo App is currently unhealthy.
+        Please wait for recovery.
+      </p>
+    </main>
+  </body>
+</html>
+""",
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+    )
+
+
+@app.get(
+    "/",
+    response_class=HTMLResponse,
+    response_model=None,
+)
+def root() -> str | HTMLResponse:
+    try:
+        todos = fetch_todos()
+    except OSError:
+        return system_failure_response()
+
     todo_items = "\n".join(
         f"        <li>{escape(todo)}</li>"
-        for todo in fetch_todos()
+        for todo in todos
     )
 
     return f"""
@@ -161,14 +193,10 @@ def create_todo(
     )
 
 
-@app.post("/break")
-def break_app() -> RedirectResponse:
+@app.post("/break", response_class=HTMLResponse)
+def break_app() -> HTMLResponse:
     break_backend()
-
-    return RedirectResponse(
-        url="/",
-        status_code=status.HTTP_303_SEE_OTHER,
-    )
+    return system_failure_response()
 
 
 @app.get("/image")

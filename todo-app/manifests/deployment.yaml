@@ -21,7 +21,7 @@ spec:
             claimName: todo-image-claim
       containers:
         - name: todo-app
-          image: todo-app:4.2
+          image: todo-app:4.2-system-failure-v2
           imagePullPolicy: IfNotPresent
 
           resources:

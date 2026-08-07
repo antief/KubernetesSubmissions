@@ -1,9 +1,10 @@
 # Ping-pong
 
-Provides two HTTP endpoints:
+Provides three HTTP endpoints:
 
 - `GET /` returns the current counter and increments it.
 - `GET /pings` returns the current counter without modifying it.
+- `GET /healthz` succeeds when the database connection works.
 
 The counter is stored in PostgreSQL.
 
@@ -13,7 +14,7 @@ PostgreSQL runs as a single-replica StatefulSet using the cluster's default Stor
 
 ```bash
 docker build \
-  -t europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:3.4 \
+  -t europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:4.1 \
   .
 ```
 
@@ -25,13 +26,13 @@ From the repository root:
 kubectl apply -f namespaces/exercises.yaml
 
 docker build \
-  -t europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:3.4 \
+  -t europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:4.1 \
   ./ping-pong
 
 docker pull docker.io/library/postgres:18.0
 
 k3d image import \
-  europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:3.4 \
+  europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:4.1 \
   docker.io/library/postgres:18.0 \
   -c k3s-default
 

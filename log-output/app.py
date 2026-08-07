@@ -3,7 +3,7 @@ from pathlib import Path
 from urllib.request import urlopen
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 
 
@@ -46,6 +46,19 @@ def information_file_content() -> str:
 def ping_pong_count() -> int:
     with urlopen(PING_PONG_URL, timeout=5) as response:
         return int(response.read().decode("utf-8").strip())
+
+
+@app.get("/healthz", response_class=PlainTextResponse)
+def healthz() -> str:
+    try:
+        ping_pong_count()
+    except (OSError, ValueError) as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Ping-pong is unavailable",
+        ) from error
+
+    return "ok"
 
 
 @app.get("/", response_class=PlainTextResponse)

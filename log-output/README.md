@@ -6,6 +6,7 @@ The application runs as two containers in a single Kubernetes Pod.
 - `log-output-reader` exposes the latest log line through HTTP.
 - The containers share the log file through an `emptyDir` volume.
 - The reader fetches the Ping-pong counter from `ping-pong-svc`.
+- The reader's `GET /healthz` endpoint succeeds when Ping-pong can respond.
 - A ConfigMap provides the `MESSAGE` environment variable and the mounted `information.txt` file.
 
 The application is deployed to the `exercises` namespace.
@@ -13,7 +14,7 @@ The application is deployed to the `exercises` namespace.
 ## Build
 
 ```bash
-docker build -t log-output:2.5 .
+docker build -t europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/log-output:4.1 .
 ```
 
 ## Deploy to k3d
@@ -24,11 +25,11 @@ From the repository root:
 kubectl apply -f namespaces/exercises.yaml
 
 docker build \
-  -t log-output:2.5 \
+  -t europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/log-output:4.1 \
   ./log-output
 
 k3d image import \
-  log-output:2.5 \
+  europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/log-output:4.1 \
   -c k3s-default
 
 kubectl apply \

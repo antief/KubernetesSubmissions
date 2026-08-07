@@ -1,13 +1,14 @@
 import os
-from contextlib import asynccontextmanager
 
 import psycopg
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 
 
 DATABASE_URL = os.environ["DATABASE_URL"]
+
+app = FastAPI()
 
 
 def initialize_database() -> None:
@@ -30,17 +31,23 @@ def initialize_database() -> None:
         )
 
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    initialize_database()
-    yield
+@app.get("/healthz", response_class=PlainTextResponse)
+def healthz() -> str:
+    try:
+        initialize_database()
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Database is unavailable",
+        ) from error
 
-
-app = FastAPI(lifespan=lifespan)
+    return "ok"
 
 
 @app.get("/", response_class=PlainTextResponse)
 def ping_pong() -> str:
+    initialize_database()
+
     with psycopg.connect(DATABASE_URL) as connection:
         row = connection.execute(
             """
@@ -60,6 +67,8 @@ def ping_pong() -> str:
 
 @app.get("/pings", response_class=PlainTextResponse)
 def pings() -> str:
+    initialize_database()
+
     with psycopg.connect(DATABASE_URL) as connection:
         row = connection.execute(
             """

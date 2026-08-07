@@ -13,28 +13,19 @@ spec:
       labels:
         app: ping-pong
     spec:
-      initContainers:
-        - name: wait-for-postgres
-          image: docker.io/library/postgres:18.0
-          command:
-            - sh
-            - -c
-            - |
-              until pg_isready \
-                -h ping-pong-postgres-svc \
-                -U pingpong \
-                -d pingpong
-              do
-                sleep 2
-              done
-
       containers:
         - name: ping-pong
-          image: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:3.4
+          image: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:4.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
           env:
             - name: PORT
               value: "8000"

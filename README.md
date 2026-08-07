@@ -50,3 +50,4 @@
 
 - [4.1](https://github.com/antief/KubernetesSubmissions/tree/4.1) ([log-output](https://github.com/antief/KubernetesSubmissions/tree/4.1/log-output), [ping-pong](https://github.com/antief/KubernetesSubmissions/tree/4.1/ping-pong))
 - [4.2](https://github.com/antief/KubernetesSubmissions/tree/4.2) ([todo-app](https://github.com/antief/KubernetesSubmissions/tree/4.2/todo-app), [todo-backend](https://github.com/antief/KubernetesSubmissions/tree/4.2/todo-backend))
+- [4.4](https://github.com/antief/KubernetesSubmissions/tree/4.4) ([ping-pong](https://github.com/antief/KubernetesSubmissions/tree/4.4/ping-pong))

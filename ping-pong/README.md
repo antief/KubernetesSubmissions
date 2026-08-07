@@ -8,7 +8,7 @@ Provides three HTTP endpoints:
 
 The counter is stored in PostgreSQL.
 
-PostgreSQL runs as a single-replica StatefulSet using the cluster's default StorageClass. The application and database are deployed to the `exercises` namespace.
+PostgreSQL runs as a single-replica StatefulSet using the cluster's default StorageClass. The application is managed by an Argo Rollout in the `exercises` namespace. Canary updates use the `ping-pong-cpu` AnalysisTemplate to check the five-minute CPU usage rate sum for containers in the namespace through Prometheus. The normal success threshold is `0.1`.
 
 ## Build
 
@@ -19,6 +19,8 @@ docker build \
 ```
 
 ## Deploy to k3d
+
+Argo Rollouts and Prometheus must already be installed in the cluster.
 
 From the repository root:
 
@@ -44,18 +46,21 @@ kubectl rollout status \
   -n exercises
 
 kubectl apply \
+  -f ping-pong/manifests/analysistemplate.yaml \
   -f ping-pong/manifests/deployment.yaml \
   -f ping-pong/manifests/service.yaml
 
-kubectl rollout status \
-  deployment/ping-pong-dep \
-  -n exercises
+kubectl wait \
+  --for=condition=Available \
+  rollout/ping-pong-dep \
+  -n exercises \
+  --timeout=2m
 ```
 
 Inspect the resources:
 
 ```bash
-kubectl get deployment,statefulset,pods,services,pvc \
+kubectl get rollout,analysistemplate,statefulset,pods,services,pvc \
   -n exercises
 ```
 
@@ -88,10 +93,23 @@ kubectl exec \
 
 ## Deploy to GKE
 
-Ping-pong is deployed together with Log output through the Gateway and
-HTTPRoute defined in `log-output/manifests/gateway.yaml` and
-`log-output/manifests/httproute.yaml`. The external `/pingpong` path is
-rewritten to `/` before the request is forwarded to Ping-pong.
+The cluster must have Argo Rollouts and Prometheus installed. Prometheus is
+available to the AnalysisTemplate through
+`prom-prometheus-server.monitoring.svc.cluster.local`.
 
-See the [Log output deployment instructions](../log-output/README.md#deploy-to-gke)
-for the combined GKE deployment and functional tests.
+From the repository root:
+
+    kubectl apply \
+      -f ping-pong/manifests/postgres.yaml \
+      -f ping-pong/manifests/analysistemplate.yaml \
+      -f ping-pong/manifests/deployment.yaml \
+      -f ping-pong/manifests/service.yaml
+
+    kubectl wait \
+      --for=condition=Available \
+      rollout/ping-pong-dep \
+      -n exercises \
+      --timeout=2m
+
+Ping-pong remains exposed at `/pingpong` through the Gateway and HTTPRoute
+defined under `log-output/manifests/`.

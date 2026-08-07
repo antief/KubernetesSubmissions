@@ -17,11 +17,11 @@ resources:
 images:
   - name: todo-app
     newName: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/todo-app
-    newTag: "2.6"
+    newTag: "4.2"
 
   - name: todo-backend
     newName: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/todo-backend
-    newTag: "2.10"
+    newTag: "4.2"
 
 patches:
   - target:

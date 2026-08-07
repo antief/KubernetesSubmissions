@@ -71,6 +71,20 @@ def send_todo(content: str) -> None:
         response.read()
 
 
+def break_backend() -> None:
+    request = Request(
+        f"{TODO_BACKEND_URL}/break",
+        data=b"",
+        method="POST",
+    )
+
+    with urlopen(
+        request,
+        timeout=BACKEND_REQUEST_TIMEOUT_SECONDS,
+    ) as response:
+        response.read()
+
+
 @app.get("/", response_class=HTMLResponse)
 def root() -> str:
     todo_items = "\n".join(
@@ -94,6 +108,10 @@ def root() -> str:
         alt="Random image"
         style="max-width: 100%"
       >
+
+      <form action="/break" method="post">
+        <button type="submit">Break</button>
+      </form>
 
       <h2>Add a todo</h2>
 
@@ -136,6 +154,16 @@ def create_todo(
         )
 
     send_todo(clean_content)
+
+    return RedirectResponse(
+        url="/",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+@app.post("/break")
+def break_app() -> RedirectResponse:
+    break_backend()
 
     return RedirectResponse(
         url="/",

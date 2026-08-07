@@ -23,6 +23,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger("todo-backend")
 
+is_healthy = True
+
 
 class TodoCreate(BaseModel):
     content: str = Field(min_length=1, max_length=140)
@@ -75,6 +77,33 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+@app.get("/healthz")
+def healthz() -> dict[str, str]:
+    if not is_healthy:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Application is unhealthy",
+        )
+
+    try:
+        with connect_to_database() as connection:
+            connection.execute("SELECT 1")
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database is unavailable",
+        ) from error
+
+    return {"status": "ok"}
+
+
+@app.post("/break")
+def break_app() -> dict[str, str]:
+    global is_healthy
+    is_healthy = False
+    return {"status": "broken"}
 
 
 @app.get("/todos", response_model=list[str])

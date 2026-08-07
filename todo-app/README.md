@@ -2,7 +2,7 @@
 
 Serves the Todo application HTML, caches the Lorem Picsum image on a persistent volume and communicates with `todo-backend-svc` over HTTP.
 
-The form accepts todos of at most 140 characters. Todo items are fetched from the backend and rendered server-side.
+The form accepts todos of at most 140 characters. Todo items are fetched from the backend and rendered server-side. The Break button marks the backend unhealthy so its liveness probe restarts it.
 
 The application is deployed to the `project` namespace.
 
@@ -11,7 +11,7 @@ Runtime URLs, ports, paths and timeout values are passed to the Pod as environme
 ## Build
 
 ```bash
-docker build -t todo-app:2.6 .
+docker build -t todo-app:4.2 .
 ```
 
 ## Deploy to k3d
@@ -25,12 +25,12 @@ docker exec \
   k3d-k3s-default-agent-0 \
   mkdir -p /tmp/todo-image
 
-docker build -t todo-app:2.6 ./todo-app
-docker build -t todo-backend:2.6 ./todo-backend
+docker build -t todo-app:4.2 ./todo-app
+docker build -t todo-backend:4.2 ./todo-backend
 
 k3d image import \
-  todo-app:2.6 \
-  todo-backend:2.6 \
+  todo-app:4.2 \
+  todo-backend:4.2 \
   -c k3s-default
 
 kubectl apply \

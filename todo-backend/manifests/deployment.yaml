@@ -51,7 +51,7 @@ spec:
 
       containers:
         - name: todo-backend
-          image: todo-backend:4.2
+          image: todo-backend:4.5
           imagePullPolicy: IfNotPresent
 
           resources:

@@ -1,6 +1,6 @@
 # Todo backend
 
-FastAPI backend for the Todo application. Todos are stored in PostgreSQL. Todo requests are logged, and todos longer than 140 characters are rejected. `GET /healthz` checks application and database health, and `POST /break` marks the process unhealthy.
+FastAPI backend for the Todo application. Todos and their done state are stored in PostgreSQL. `GET /todos` lists todos and `PUT /todos/<id>` marks a todo done. Todo requests are logged, and todos longer than 140 characters are rejected. `GET /healthz` checks application and database health, and `POST /break` marks the process unhealthy.
 
 A CronJob creates an hourly todo for a random Wikipedia article. A separate daily CronJob backs up PostgreSQL to Google Cloud Storage.
 
@@ -9,7 +9,7 @@ PostgreSQL runs as a single-replica StatefulSet. Database settings are provided 
 ## Build
 
 ```bash
-docker build -t todo-backend:4.2 ./todo-backend
+docker build -t todo-backend:4.5 ./todo-backend
 ```
 
 ## Deploy
@@ -20,7 +20,7 @@ kubectl apply -f namespaces/project.yaml
 docker pull postgres:18.0
 
 k3d image import \
-  todo-backend:4.2 \
+  todo-backend:4.5 \
   postgres:18.0 \
   -c k3s-default
 

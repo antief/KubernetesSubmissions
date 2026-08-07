@@ -30,6 +30,12 @@ class TodoCreate(BaseModel):
     content: str = Field(min_length=1, max_length=140)
 
 
+class Todo(BaseModel):
+    id: int
+    content: str
+    done: bool
+
+
 def connect_to_database():
     return psycopg.connect(
         host=POSTGRES_HOST,
@@ -46,8 +52,16 @@ def initialize_database() -> None:
             """
             CREATE TABLE IF NOT EXISTS todos (
                 id BIGSERIAL PRIMARY KEY,
-                content VARCHAR(140) NOT NULL
+                content VARCHAR(140) NOT NULL,
+                done BOOLEAN NOT NULL DEFAULT FALSE
             )
+            """
+        )
+
+        connection.execute(
+            """
+            ALTER TABLE todos
+            ADD COLUMN IF NOT EXISTS done BOOLEAN NOT NULL DEFAULT FALSE
             """
         )
 
@@ -106,18 +120,51 @@ def break_app() -> dict[str, str]:
     return {"status": "broken"}
 
 
-@app.get("/todos", response_model=list[str])
-def get_todos() -> list[str]:
+@app.get("/todos", response_model=list[Todo])
+def get_todos() -> list[Todo]:
     with connect_to_database() as connection:
         rows = connection.execute(
             """
-            SELECT content
+            SELECT id, content, done
             FROM todos
             ORDER BY id
             """
         ).fetchall()
 
-    return [row[0] for row in rows]
+    return [
+        Todo(
+            id=row[0],
+            content=row[1],
+            done=row[2],
+        )
+        for row in rows
+    ]
+
+
+@app.put("/todos/{todo_id}", response_model=Todo)
+def mark_todo_done(todo_id: int) -> Todo:
+    with connect_to_database() as connection:
+        row = connection.execute(
+            """
+            UPDATE todos
+            SET done = TRUE
+            WHERE id = %s
+            RETURNING id, content, done
+            """,
+            (todo_id,),
+        ).fetchone()
+
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo not found",
+        )
+
+    return Todo(
+        id=row[0],
+        content=row[1],
+        done=row[2],
+    )
 
 
 @app.post(

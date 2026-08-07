@@ -46,7 +46,7 @@ def update_image() -> None:
         IMAGE_FILE.write_bytes(response.read())
 
 
-def fetch_todos() -> list[str]:
+def fetch_todos() -> list[dict[str, object]]:
     with urlopen(
         f"{TODO_BACKEND_URL}/todos",
         timeout=BACKEND_REQUEST_TIMEOUT_SECONDS,
@@ -62,6 +62,20 @@ def send_todo(content: str) -> None:
         data=payload,
         headers={"Content-Type": "application/json"},
         method="POST",
+    )
+
+    with urlopen(
+        request,
+        timeout=BACKEND_REQUEST_TIMEOUT_SECONDS,
+    ) as response:
+        response.read()
+
+
+def mark_todo_done(todo_id: int) -> None:
+    request = Request(
+        f"{TODO_BACKEND_URL}/todos/{todo_id}",
+        data=b"",
+        method="PUT",
     )
 
     with urlopen(
@@ -120,7 +134,17 @@ def root() -> str | HTMLResponse:
         return system_failure_response()
 
     todo_items = "\n".join(
-        f"        <li>{escape(todo)}</li>"
+        (
+            f"        <li>{escape(str(todo['content']))} — Done</li>"
+            if todo["done"]
+            else (
+                f'        <li>{escape(str(todo["content"]))} '
+                f'<form action="/todos/{todo["id"]}/done" method="post" '
+                f'style="display: inline">'
+                f'<button type="submit">Mark done</button>'
+                f'</form></li>'
+            )
+        )
         for todo in todos
     )
 
@@ -186,6 +210,16 @@ def create_todo(
         )
 
     send_todo(clean_content)
+
+    return RedirectResponse(
+        url="/",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+@app.post("/todos/{todo_id}/done")
+def mark_done(todo_id: int) -> RedirectResponse:
+    mark_todo_done(todo_id)
 
     return RedirectResponse(
         url="/",

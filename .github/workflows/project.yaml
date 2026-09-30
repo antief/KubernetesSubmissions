@@ -92,11 +92,27 @@ jobs:
           git status --short --untracked-files=all
           git diff HEAD --check
           git diff HEAD
-          git diff HEAD --name-only -z | xargs -0 -r git add --
+          git diff --check
+          git diff
+          git diff --cached --check
+          git diff --cached
+          {
+            git diff --name-only -z
+            git diff --cached --name-only -z
+          } | xargs -0 -r git add --
           git diff --cached --check
           git diff --cached --name-only
           git diff --cached --stat
           git diff --cached
+          git show ":overlays/$DEPLOY_ENVIRONMENT/kustomization.yaml" \
+            | awk -v expected="$GITHUB_SHA" '
+                /newTag:/ {
+                  gsub(/"/, "", $2)
+                  if ($2 != expected) exit 1
+                  count++
+                }
+                END { if (count != 3) exit 1 }
+              '
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

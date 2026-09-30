@@ -8,46 +8,25 @@ The application is deployed to the `project` namespace.
 
 Runtime URLs, ports, paths and timeout values are passed to the Pod as environment variables in the Deployment.
 
-## Build
+## Deploy with GitOps
 
-```bash
-docker build -t todo-app:4.5 .
-```
+GitHub Actions builds and publishes the Todo app, backend and broadcaster to GHCR on changes to `main`. It updates the images in the root `kustomization.yaml`; Argo CD synchronizes the desired state to the `project` namespace.
 
-## Deploy to k3d
-
-From the repository root:
+Prepare the namespace, local image volume, NATS and secrets as described in the backend and broadcaster READMEs. Then register the application:
 
 ```bash
 kubectl apply -f namespaces/project.yaml
 
-docker exec \
-  k3d-k3s-default-agent-0 \
-  mkdir -p /tmp/todo-image
-
-docker build -t todo-app:4.5 ./todo-app
-docker build -t todo-backend:4.5 ./todo-backend
-
-k3d image import \
-  todo-app:4.5 \
-  todo-backend:4.5 \
-  -c k3s-default
-
-kubectl apply \
-  -f storage/todo-image-persistentvolume.yaml
-
-kubectl apply \
-  -f todo-backend/manifests/
-
-kubectl apply \
-  -f todo-app/manifests/
+docker exec k3d-k3s-default-agent-0 mkdir -p /tmp/todo-image
+kubectl apply -f storage/todo-image-persistentvolume.yaml
+kubectl apply -n argocd -f argocd/project-application.yaml
 ```
 
-Inspect the project resources:
+Check synchronization and workloads:
 
 ```bash
-kubectl get deployments,pods,services,ingress,pvc \
-  -n project
+kubectl get application project -n argocd
+kubectl get deployments,pods,services,ingress,pvc -n project
 ```
 
 Open <http://localhost:8081/>.

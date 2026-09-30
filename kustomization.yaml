@@ -13,35 +13,16 @@ resources:
   - todo-app/manifests/persistentvolumeclaim.yaml
   - todo-app/manifests/deployment.yaml
   - todo-app/manifests/service.yaml
+  - todo-app/manifests/ingress.yaml
+  - broadcaster/manifests/deployment.yaml
 
 images:
   - name: todo-app
-    newName: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/todo-app
+    newName: ghcr.io/antief/todo-app
     newTag: "4.5"
-
   - name: todo-backend
-    newName: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/todo-backend
-    newTag: "4.5"
-
-patches:
-  - target:
-      kind: Service
-      name: todo-app-svc
-    patch: |-
-      - op: replace
-        path: /spec/type
-        value: LoadBalancer
-
-  - target:
-      kind: PersistentVolumeClaim
-      name: todo-image-claim
-    patch: |-
-      - op: remove
-        path: /spec/storageClassName
-
-  - target:
-      kind: StatefulSet
-      name: todo-postgres
-    patch: |-
-      - op: remove
-        path: /spec/volumeClaimTemplates/0/spec/storageClassName
+    newName: ghcr.io/antief/todo-backend
+    newTag: "4.6"
+  - name: broadcaster
+    newName: ghcr.io/antief/broadcaster
+    newTag: "4.6"

@@ -4,12 +4,6 @@ Consumes Todo creation and update events from NATS and forwards them to a generi
 
 All broadcaster replicas use the same NATS queue group, so each event is handled by only one replica. The Deployment runs six replicas.
 
-## Build
-
-```bash
-docker build -t broadcaster:4.6 ./broadcaster
-```
-
 ## NATS
 
 Install NATS with the Prometheus exporter:
@@ -36,11 +30,6 @@ sops --decrypt \
   | kubectl apply -f -
 ```
 
-## Deploy to k3d
+## Deployment
 
-```bash
-k3d image import broadcaster:4.6 -c k3s-default
-
-kubectl apply \
-  -f broadcaster/manifests/deployment.yaml
-```
+The root Kustomization includes the broadcaster Deployment. GitHub Actions publishes its image to GHCR and Argo CD deploys it alongside the Todo application. See the Todo app README for GitOps setup.

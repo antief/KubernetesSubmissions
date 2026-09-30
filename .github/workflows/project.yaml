@@ -1,0 +1,59 @@
+name: Todo project GitOps
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "todo-app/**"
+      - "todo-backend/**"
+      - "broadcaster/**"
+      - "kustomization.yaml"
+      - ".github/workflows/project.yaml"
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: todo-project-gitops
+  cancel-in-progress: false
+
+jobs:
+  build-publish-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        run: |
+          for app in todo-app todo-backend broadcaster; do
+            image="ghcr.io/antief/$app:$GITHUB_SHA"
+            docker build --tag "$image" "./$app"
+            docker push "$image"
+          done
+
+      - name: Set up Kustomize
+        uses: imranismail/setup-kustomize@v3
+
+      - name: Update images
+        run: |
+          kustomize edit set image \
+            todo-app=ghcr.io/antief/todo-app:$GITHUB_SHA \
+            todo-backend=ghcr.io/antief/todo-backend:$GITHUB_SHA \
+            broadcaster=ghcr.io/antief/broadcaster:$GITHUB_SHA
+
+      - name: Commit deployment update
+        uses: EndBug/add-and-commit@v10
+        with:
+          add: kustomization.yaml
+          message: "chore: update todo project images"

@@ -6,37 +6,21 @@ A CronJob creates an hourly todo for a random Wikipedia article. A separate dail
 
 PostgreSQL runs as a single-replica StatefulSet. Database settings are provided through a ConfigMap and a SOPS-encrypted Secret.
 
-## Build
+## Secrets and deployment
+
+The root Kustomization deploys the backend, PostgreSQL and CronJobs through Argo CD. See the Todo app README for GitOps setup.
+
+Provision the database Secret before synchronization:
 
 ```bash
-docker build -t todo-backend:4.6 ./todo-backend
-```
-
-## Deploy
-
-```bash
-kubectl apply -f namespaces/project.yaml
-
-docker pull postgres:18.0
-
-k3d image import \
-  todo-backend:4.6 \
-  postgres:18.0 \
-  -c k3s-default
-
 export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
 
 sops --decrypt \
   todo-backend/manifests/secret.enc.yaml \
-  | kubectl apply -f -
-
-kubectl apply \
-  -f todo-backend/manifests/configmap.yaml \
-  -f todo-backend/manifests/postgres.yaml \
-  -f todo-backend/manifests/deployment.yaml \
-  -f todo-backend/manifests/service.yaml \
-  -f todo-backend/manifests/cronjob.yaml
+  | kubectl apply -n project -f -
 ```
+
+The backup CronJob requires a `storage-sa-key` Secret in `project` containing `key.json`, a Google service account key with access to the configured backup bucket.
 
 ## Exercise 3.9: DBaaS vs DIY
 

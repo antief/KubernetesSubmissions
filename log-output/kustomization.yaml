@@ -12,12 +12,12 @@ resources:
 - manifests/waypoint.yaml
 
 images:
-- name: log-output
-  newName: ghcr.io/antief/log-output
-  newTag: 4fb11eb540970fef048d68d83b6679b35700de86
 - name: greeter-v1
   newName: ghcr.io/antief/log-output
-  newTag: 5.3-greeter-v1
+  newTag: 37ba5f74d95bb13692c892ce2b4bea768d154c97-greeter-v1
 - name: greeter-v2
   newName: ghcr.io/antief/log-output
-  newTag: 5.3-greeter-v2
+  newTag: 37ba5f74d95bb13692c892ce2b4bea768d154c97-greeter-v2
+- name: log-output
+  newName: ghcr.io/antief/log-output
+  newTag: 37ba5f74d95bb13692c892ce2b4bea768d154c97

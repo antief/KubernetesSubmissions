@@ -61,3 +61,4 @@
 ### Chapter 6
 
 - [5.1](https://github.com/antief/KubernetesSubmissions/tree/5.1/dummy-site)
+- [5.3](https://github.com/antief/KubernetesSubmissions/tree/5.3) ([log-output](https://github.com/antief/KubernetesSubmissions/tree/5.3/log-output), [greeter](https://github.com/antief/KubernetesSubmissions/tree/5.3/greeter))

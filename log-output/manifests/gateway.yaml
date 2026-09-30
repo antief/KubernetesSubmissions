@@ -3,8 +3,10 @@ kind: Gateway
 metadata:
   name: log-output-gateway
   namespace: exercises
+  annotations:
+    networking.istio.io/service-type: ClusterIP
 spec:
-  gatewayClassName: gke-l7-global-external-managed
+  gatewayClassName: istio
   listeners:
     - name: http
       protocol: HTTP

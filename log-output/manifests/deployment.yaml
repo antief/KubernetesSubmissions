@@ -12,6 +12,7 @@ spec:
     metadata:
       labels:
         app: log-output
+        istio.io/dataplane-mode: ambient
     spec:
       volumes:
         - name: log-data
@@ -65,6 +66,9 @@ spec:
                 configMapKeyRef:
                   name: log-output-config
                   key: MESSAGE
+
+            - name: GREETER_URL
+              value: http://greeter-svc:8000/
 
             - name: PING_PONG_URL
               value: http://ping-pong-svc:8000/pings

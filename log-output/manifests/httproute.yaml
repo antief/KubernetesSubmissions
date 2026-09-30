@@ -20,7 +20,7 @@ spec:
               replacePrefixMatch: /
       backendRefs:
         - name: ping-pong-svc
-          port: 80
+          port: 8000
 
     - matches:
         - path:

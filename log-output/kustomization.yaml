@@ -5,8 +5,19 @@ resources:
 - manifests/configmap.yaml
 - manifests/deployment.yaml
 - manifests/service.yaml
+- manifests/gateway.yaml
+- manifests/httproute.yaml
+- manifests/greeter.yaml
+- manifests/greeter-route.yaml
+- manifests/waypoint.yaml
 
 images:
 - name: log-output
   newName: ghcr.io/antief/log-output
   newTag: 4fb11eb540970fef048d68d83b6679b35700de86
+- name: greeter-v1
+  newName: ghcr.io/antief/log-output
+  newTag: 5.3-greeter-v1
+- name: greeter-v2
+  newName: ghcr.io/antief/log-output
+  newTag: 5.3-greeter-v2

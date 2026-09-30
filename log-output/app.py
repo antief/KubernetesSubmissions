@@ -22,6 +22,8 @@ PING_PONG_URL = os.getenv(
     "http://ping-pong-svc:8000/pings",
 )
 
+GREETER_URL = os.getenv("GREETER_URL", "http://greeter-svc:8000/")
+
 app = FastAPI()
 
 
@@ -48,14 +50,20 @@ def ping_pong_count() -> int:
         return int(response.read().decode("utf-8").strip())
 
 
+def greeting() -> str:
+    with urlopen(GREETER_URL, timeout=5) as response:
+        return response.read().decode("utf-8").strip()
+
+
 @app.get("/healthz", response_class=PlainTextResponse)
 def healthz() -> str:
     try:
         ping_pong_count()
+        greeting()
     except (OSError, ValueError) as error:
         raise HTTPException(
             status_code=500,
-            detail="Ping-pong is unavailable",
+            detail="A dependent service is unavailable",
         ) from error
 
     return "ok"
@@ -68,6 +76,7 @@ def root() -> str:
         f"env variable: MESSAGE={MESSAGE}\n"
         f"{latest_log_line()}\n"
         f"Ping / Pongs: {ping_pong_count()}\n"
+        f"greetings: {greeting()}\n"
     )
 
 

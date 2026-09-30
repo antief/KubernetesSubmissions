@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "log-output/**"
+      - "greeter/**"
       - ".github/workflows/main.yaml"
 
 permissions:
@@ -36,6 +37,11 @@ jobs:
             ./log-output
 
           docker push "$IMAGE:$GITHUB_SHA"
+          for version in 1 2; do
+            image="ghcr.io/antief/log-output:$GITHUB_SHA-greeter-v$version"
+            docker build --build-arg VERSION="$version" --tag "$image" ./greeter
+            docker push "$image"
+          done
 
       - name: Set up Kustomize
         uses: imranismail/setup-kustomize@v3
@@ -44,7 +50,9 @@ jobs:
         working-directory: log-output
         run: |
           kustomize edit set image \
-            log-output=ghcr.io/antief/log-output:$GITHUB_SHA
+            log-output=ghcr.io/antief/log-output:$GITHUB_SHA \
+            greeter-v1=ghcr.io/antief/log-output:$GITHUB_SHA-greeter-v1 \
+            greeter-v2=ghcr.io/antief/log-output:$GITHUB_SHA-greeter-v2
 
       - name: Commit deployment update
         uses: EndBug/add-and-commit@v10

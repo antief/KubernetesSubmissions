@@ -8,13 +8,13 @@ resources:
 images:
 - name: ghcr.io/antief/broadcaster
   newName: ghcr.io/antief/broadcaster
-  newTag: b7118e6b4ae1eca526423a826b85df7daebd4ee5
+  newTag: 7c7c27c448ac9857a56e519a50363583e0e15d16
 - name: ghcr.io/antief/todo-app
   newName: ghcr.io/antief/todo-app
-  newTag: b7118e6b4ae1eca526423a826b85df7daebd4ee5
+  newTag: 7c7c27c448ac9857a56e519a50363583e0e15d16
 - name: ghcr.io/antief/todo-backend
   newName: ghcr.io/antief/todo-backend
-  newTag: b7118e6b4ae1eca526423a826b85df7daebd4ee5
+  newTag: 7c7c27c448ac9857a56e519a50363583e0e15d16
 patches:
 - patch: |-
     - op: replace

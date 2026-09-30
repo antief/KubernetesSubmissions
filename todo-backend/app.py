@@ -1,7 +1,9 @@
+import json
 import logging
 import os
 from contextlib import asynccontextmanager
 
+import nats
 import psycopg
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, status
@@ -16,6 +18,9 @@ POSTGRES_PORT = int(os.environ["POSTGRES_PORT"])
 POSTGRES_DB = os.environ["POSTGRES_DB"]
 POSTGRES_USER = os.environ["POSTGRES_USER"]
 POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
+
+NATS_URL = os.environ["NATS_URL"]
+NATS_SUBJECT = "todos.events"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -85,12 +90,31 @@ def initialize_database() -> None:
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(app: FastAPI):
     initialize_database()
-    yield
+    app.state.nats = await nats.connect(NATS_URL)
+
+    try:
+        yield
+    finally:
+        await app.state.nats.drain()
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+async def publish_todo_event(message: str) -> None:
+    payload = json.dumps(
+        {
+            "message": message,
+        }
+    ).encode()
+
+    await app.state.nats.publish(
+        NATS_SUBJECT,
+        payload,
+    )
+    await app.state.nats.flush()
 
 
 @app.get("/healthz")
@@ -142,7 +166,7 @@ def get_todos() -> list[Todo]:
 
 
 @app.put("/todos/{todo_id}", response_model=Todo)
-def mark_todo_done(todo_id: int) -> Todo:
+async def mark_todo_done(todo_id: int) -> Todo:
     with connect_to_database() as connection:
         row = connection.execute(
             """
@@ -160,11 +184,15 @@ def mark_todo_done(todo_id: int) -> Todo:
             detail="Todo not found",
         )
 
-    return Todo(
+    todo = Todo(
         id=row[0],
         content=row[1],
         done=row[2],
     )
+
+    await publish_todo_event("A todo was updated")
+
+    return todo
 
 
 @app.post(
@@ -212,6 +240,8 @@ async def create_todo(request: Request) -> str:
         )
 
     logger.info("todo_created content=%r", content)
+
+    await publish_todo_event("A todo was created")
 
     return content
 

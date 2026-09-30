@@ -51,7 +51,7 @@ spec:
 
       containers:
         - name: todo-backend
-          image: todo-backend:4.5
+          image: todo-backend:4.6
           imagePullPolicy: IfNotPresent
 
           resources:
@@ -86,6 +86,9 @@ spec:
 
             - name: PORT
               value: "8000"
+
+            - name: NATS_URL
+              value: nats://my-nats.nats.svc.cluster.local:4222
 
           envFrom:
             - configMapRef:

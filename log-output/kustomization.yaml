@@ -15,13 +15,13 @@ resources:
 images:
 - name: greeter-v1
   newName: ghcr.io/antief/log-output
-  newTag: 37ba5f74d95bb13692c892ce2b4bea768d154c97-greeter-v1
+  newTag: 3f7246a3b58442410860d6afc992b466d067832a-greeter-v1
 - name: greeter-v2
   newName: ghcr.io/antief/log-output
-  newTag: 37ba5f74d95bb13692c892ce2b4bea768d154c97-greeter-v2
+  newTag: 3f7246a3b58442410860d6afc992b466d067832a-greeter-v2
 - name: log-output
   newName: ghcr.io/antief/log-output
-  newTag: 37ba5f74d95bb13692c892ce2b4bea768d154c97
+  newTag: 3f7246a3b58442410860d6afc992b466d067832a
 - name: ping-pong
-  newName: dev.local/ping-pong
-  newTag: "5.7"
+  newName: ghcr.io/antief/log-output
+  newTag: 3f7246a3b58442410860d6afc992b466d067832a-ping-pong

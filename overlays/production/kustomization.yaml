@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: production
+resources:
+- ../../base
+- namespace.yaml
+- backup.yaml
+images:
+- name: ghcr.io/antief/todo-app
+  newName: ghcr.io/antief/todo-app
+  newTag: b3e3f3040d1c6785c50a2fafae71b5b427fd93f0
+- name: ghcr.io/antief/todo-backend
+  newName: ghcr.io/antief/todo-backend
+  newTag: b3e3f3040d1c6785c50a2fafae71b5b427fd93f0
+- name: ghcr.io/antief/broadcaster
+  newName: ghcr.io/antief/broadcaster
+  newTag: b3e3f3040d1c6785c50a2fafae71b5b427fd93f0
+patches:
+- target:
+    kind: PersistentVolumeClaim
+    name: todo-image-claim
+  patch: |-
+    - op: replace
+      path: /spec/storageClassName
+      value: local-path
+- target:
+    kind: Ingress
+    name: course-ingress
+  patch: |-
+    - op: add
+      path: /spec/rules/0/host
+      value: production.todo.local
+- path: broadcaster.yaml
+- path: backend.yaml

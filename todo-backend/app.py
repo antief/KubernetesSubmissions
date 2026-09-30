@@ -20,7 +20,7 @@ POSTGRES_USER = os.environ["POSTGRES_USER"]
 POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
 
 NATS_URL = os.environ["NATS_URL"]
-NATS_SUBJECT = "todos.events"
+NATS_SUBJECT = os.environ.get("NATS_SUBJECT", "todos.events")
 
 logging.basicConfig(
     level=logging.INFO,

@@ -2,25 +2,27 @@
 
 FastAPI backend for the Todo application. Todos and their done state are stored in PostgreSQL. `GET /todos` lists todos and `PUT /todos/<id>` marks a todo done. Todo creation and update events are published to NATS for the broadcaster service. Todo requests are logged, and todos longer than 140 characters are rejected. `GET /healthz` checks application and database health, and `POST /break` marks the process unhealthy.
 
-A CronJob creates an hourly todo for a random Wikipedia article. A separate daily CronJob backs up PostgreSQL to Google Cloud Storage.
+A CronJob creates an hourly todo for a random Wikipedia article. Production has a daily CronJob that saves PostgreSQL dumps to a separate persistent volume. Staging has no database backup job.
 
 PostgreSQL runs as a single-replica StatefulSet. Database settings are provided through a ConfigMap and a SOPS-encrypted Secret.
 
 ## Secrets and deployment
 
-The root Kustomization deploys the backend, PostgreSQL and CronJobs through Argo CD. See the Todo app README for GitOps setup.
+The staging and production overlays deploy the backend, PostgreSQL and CronJobs through Argo CD. See the Todo app README for GitOps setup.
 
-Provision the database Secret before synchronization:
+Provision the database Secret in each environment before synchronization:
 
 ```bash
 export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
 
-sops --decrypt \
-  todo-backend/manifests/secret.enc.yaml \
-  | kubectl apply -n project -f -
+for namespace in staging production; do
+  sops --decrypt todo-backend/manifests/secret.enc.yaml \
+    | sed "s/namespace: project/namespace: $namespace/" \
+    | kubectl apply -n "$namespace" -f -
+done
 ```
 
-The backup CronJob requires a `storage-sa-key` Secret in `project` containing `key.json`, a Google service account key with access to the configured backup bucket.
+Production backups are stored in the `todo-backups` PVC. These local volumes survive Pod restarts but do not protect against loss of the cluster or host. The standalone `manifests/backup-cronjob.yaml` provides the GCS variant and requires a `storage-sa-key` Secret containing `key.json` and an enabled Google Cloud billing account.
 
 ## Exercise 3.9: DBaaS vs DIY
 

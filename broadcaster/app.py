@@ -8,9 +8,10 @@ import nats
 
 
 NATS_URL = os.environ["NATS_URL"]
-WEBHOOK_URL = os.environ["WEBHOOK_URL"]
+FORWARD_WEBHOOK = os.environ.get("FORWARD_WEBHOOK", "true").lower() == "true"
+WEBHOOK_URL = os.environ["WEBHOOK_URL"] if FORWARD_WEBHOOK else None
 
-NATS_SUBJECT = "todos.events"
+NATS_SUBJECT = os.environ.get("NATS_SUBJECT", "todos.events")
 NATS_QUEUE_GROUP = "todo-broadcasters"
 
 logging.basicConfig(
@@ -48,12 +49,14 @@ async def main() -> None:
         event = json.loads(message.data.decode())
         text = event["message"]
 
-        await asyncio.to_thread(
-            send_webhook,
-            text,
-        )
-
-        logger.info("forwarded message=%r", text)
+        if FORWARD_WEBHOOK:
+            await asyncio.to_thread(
+                send_webhook,
+                text,
+            )
+            logger.info("forwarded message=%r", text)
+        else:
+            logger.info("received message=%r", text)
 
     await client.subscribe(
         NATS_SUBJECT,

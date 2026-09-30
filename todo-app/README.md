@@ -4,29 +4,34 @@ Serves the Todo application HTML, caches the Lorem Picsum image on a persistent 
 
 The form accepts todos of at most 140 characters. Todo items are fetched from the backend and rendered server-side. Incomplete todos can be marked done from the UI. The Break button marks the backend unhealthy, displays a System Failure page and lets the liveness probe restart the backend.
 
-The application is deployed to the `project` namespace.
+The application has separate `staging` and `production` namespaces.
 
 Runtime URLs, ports, paths and timeout values are passed to the Pod as environment variables in the Deployment.
 
 ## Deploy with GitOps
 
-GitHub Actions builds and publishes the Todo app, backend and broadcaster to GHCR on changes to `main`. It updates the images in the root `kustomization.yaml`; Argo CD synchronizes the desired state to the `project` namespace.
+GitHub Actions publishes the Todo app, backend and broadcaster to GHCR. Each commit to `main` updates the staging overlay; each tag builds that revision and updates the `production-release` branch. Argo CD synchronizes staging from `main` and production from `production-release`. The workflow can also be run manually for either environment.
 
-Prepare the namespace, local image volume, NATS and secrets as described in the backend and broadcaster READMEs. Then register the application:
-
-```bash
-kubectl apply -f namespaces/project.yaml
-
-docker exec k3d-k3s-default-agent-0 mkdir -p /tmp/todo-image
-kubectl apply -f storage/todo-image-persistentvolume.yaml
-kubectl apply -n argocd -f argocd/project-application.yaml
-```
-
-Check synchronization and workloads:
+Create the environment namespaces:
 
 ```bash
-kubectl get application project -n argocd
-kubectl get deployments,pods,services,ingress,pvc -n project
+kubectl apply -f overlays/staging/namespace.yaml
+kubectl apply -f overlays/production/namespace.yaml
 ```
 
-Open <http://localhost:8081/>.
+Provision NATS and the secrets described in the backend and broadcaster READMEs, then register the applications:
+
+```bash
+kubectl apply -n argocd -f argocd/project-staging-application.yaml
+kubectl apply -n argocd -f argocd/project-production-application.yaml
+```
+
+Both environments use separate dynamically provisioned volumes and NATS subjects. Staging broadcasts are logged locally and its database is not backed up. Production forwards broadcasts to the webhook and backs up PostgreSQL daily.
+
+```bash
+kubectl get applications -n argocd
+kubectl get deployments,pods,services,ingress,pvc -n staging
+kubectl get deployments,pods,services,ingress,pvc,cronjobs -n production
+```
+
+Open <http://staging.todo.local:8081/> or <http://production.todo.local:8081/> with both names resolving to `127.0.0.1`.

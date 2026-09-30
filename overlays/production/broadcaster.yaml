@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: broadcaster
+  namespace: project
+spec:
+  template:
+    spec:
+      containers:
+      - name: broadcaster
+        env:
+        - name: NATS_SUBJECT
+          value: todos.production.events
+        - name: FORWARD_WEBHOOK
+          value: 'true'

@@ -1,8 +1,8 @@
 # Todo broadcaster
 
-Consumes Todo creation and update events from NATS and forwards them to a generic HTTP webhook.
+Consumes Todo creation and update events from NATS. Production forwards them to a generic HTTP webhook; staging logs them without forwarding.
 
-All broadcaster replicas use the same NATS queue group, so each event is handled by only one replica. The Deployment runs six replicas.
+All broadcaster replicas use the same NATS queue group on their environment-specific subject, so each event is handled by only one replica. The Deployment runs six replicas.
 
 ## NATS
 
@@ -20,16 +20,17 @@ helm upgrade --install my-nats nats/nats \
 
 ## Webhook secret
 
-The webhook URL is stored in a SOPS-encrypted Kubernetes Secret.
+The production webhook URL is stored in a SOPS-encrypted Kubernetes Secret. Staging needs no webhook credential.
 
 ```bash
 export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
 
 sops --decrypt \
   broadcaster/manifests/secret.enc.yaml \
-  | kubectl apply -f -
+  | sed "s/namespace: project/namespace: production/" \
+  | kubectl apply -n production -f -
 ```
 
 ## Deployment
 
-The root Kustomization includes the broadcaster Deployment. GitHub Actions publishes its image to GHCR and Argo CD deploys it alongside the Todo application. See the Todo app README for GitOps setup.
+Both environment overlays include the broadcaster Deployment. GitHub Actions publishes its image to GHCR and Argo CD deploys it alongside the Todo application. See the Todo app README for GitOps setup.

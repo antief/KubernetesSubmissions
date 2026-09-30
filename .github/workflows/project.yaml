@@ -4,12 +4,18 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "todo-app/**"
-      - "todo-backend/**"
-      - "broadcaster/**"
-      - "kustomization.yaml"
-      - ".github/workflows/project.yaml"
+    tags:
+      - "**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
 
 permissions:
   contents: write
@@ -27,6 +33,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Select environment
+        env:
+          REQUESTED_ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ] || [ "$REQUESTED_ENVIRONMENT" = production ]; then
+            echo "DEPLOY_ENVIRONMENT=production" >> "$GITHUB_ENV"
+            echo "DEPLOY_BRANCH=production-release" >> "$GITHUB_ENV"
+          else
+            echo "DEPLOY_ENVIRONMENT=staging" >> "$GITHUB_ENV"
+            echo "DEPLOY_BRANCH=main" >> "$GITHUB_ENV"
+          fi
+
       - name: Log in to GHCR
         uses: docker/login-action@v4
         with:
@@ -42,18 +60,46 @@ jobs:
             docker push "$image"
           done
 
+      - name: Verify published images
+        run: |
+          for app in todo-app todo-backend broadcaster; do
+            docker manifest inspect "ghcr.io/antief/$app:$GITHUB_SHA" > /dev/null
+          done
+
       - name: Set up Kustomize
         uses: imranismail/setup-kustomize@v3
 
       - name: Update images
         run: |
+          git fetch origin main
+          if [ "$DEPLOY_ENVIRONMENT" = staging ]; then
+            git checkout -B main origin/main
+          elif git ls-remote --exit-code --heads origin production-release > /dev/null; then
+            git fetch origin production-release
+            git checkout -B production-release origin/production-release
+            git restore --source "$GITHUB_SHA" --staged --worktree -- .
+          else
+            git checkout -b production-release "$GITHUB_SHA"
+          fi
+          cd "overlays/$DEPLOY_ENVIRONMENT"
           kustomize edit set image \
-            todo-app=ghcr.io/antief/todo-app:$GITHUB_SHA \
-            todo-backend=ghcr.io/antief/todo-backend:$GITHUB_SHA \
-            broadcaster=ghcr.io/antief/broadcaster:$GITHUB_SHA
+            ghcr.io/antief/todo-app=ghcr.io/antief/todo-app:$GITHUB_SHA \
+            ghcr.io/antief/todo-backend=ghcr.io/antief/todo-backend:$GITHUB_SHA \
+            ghcr.io/antief/broadcaster=ghcr.io/antief/broadcaster:$GITHUB_SHA
 
       - name: Commit deployment update
-        uses: EndBug/add-and-commit@v10
-        with:
-          add: kustomization.yaml
-          message: "chore: update todo project images"
+        run: |
+          git status --short --untracked-files=all
+          git diff HEAD --check
+          git diff HEAD
+          git diff HEAD --name-only -z | xargs -0 -r git add --
+          git diff --cached --check
+          git diff --cached --name-only
+          git diff --cached --stat
+          git diff --cached
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: update $DEPLOY_ENVIRONMENT images"
+            git push origin "$DEPLOY_BRANCH"
+          fi

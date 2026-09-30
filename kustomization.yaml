@@ -4,25 +4,25 @@ kind: Kustomization
 namespace: project
 
 resources:
-  - todo-backend/manifests/configmap.yaml
-  - todo-backend/manifests/postgres.yaml
-  - todo-backend/manifests/deployment.yaml
-  - todo-backend/manifests/service.yaml
-  - todo-backend/manifests/cronjob.yaml
-  - todo-backend/manifests/backup-cronjob.yaml
-  - todo-app/manifests/persistentvolumeclaim.yaml
-  - todo-app/manifests/deployment.yaml
-  - todo-app/manifests/service.yaml
-  - todo-app/manifests/ingress.yaml
-  - broadcaster/manifests/deployment.yaml
+- todo-backend/manifests/configmap.yaml
+- todo-backend/manifests/postgres.yaml
+- todo-backend/manifests/deployment.yaml
+- todo-backend/manifests/service.yaml
+- todo-backend/manifests/cronjob.yaml
+- todo-backend/manifests/backup-cronjob.yaml
+- todo-app/manifests/persistentvolumeclaim.yaml
+- todo-app/manifests/deployment.yaml
+- todo-app/manifests/service.yaml
+- todo-app/manifests/ingress.yaml
+- broadcaster/manifests/deployment.yaml
 
 images:
-  - name: todo-app
-    newName: ghcr.io/antief/todo-app
-    newTag: "4.5"
-  - name: todo-backend
-    newName: ghcr.io/antief/todo-backend
-    newTag: "4.6"
-  - name: broadcaster
-    newName: ghcr.io/antief/broadcaster
-    newTag: "4.6"
+- name: broadcaster
+  newName: ghcr.io/antief/broadcaster
+  newTag: b3e3f3040d1c6785c50a2fafae71b5b427fd93f0
+- name: todo-app
+  newName: ghcr.io/antief/todo-app
+  newTag: b3e3f3040d1c6785c50a2fafae71b5b427fd93f0
+- name: todo-backend
+  newName: ghcr.io/antief/todo-backend
+  newTag: b3e3f3040d1c6785c50a2fafae71b5b427fd93f0

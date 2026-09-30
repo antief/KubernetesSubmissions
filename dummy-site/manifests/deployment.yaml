@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dummy-site-controller
+  namespace: exercises
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dummy-site-controller
+  template:
+    metadata:
+      labels:
+        app: dummy-site-controller
+    spec:
+      serviceAccountName: dummy-site-controller
+      containers:
+        - name: controller
+          image: dummy-site-controller:5.1
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

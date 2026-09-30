@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wikipedia-scripts
+  namespace: exercises
+data:
+  download.sh: |
+    set -eu
+    curl --location --fail --show-error --silent --retry 3 \
+      --connect-timeout 10 --max-time 120 \
+      --output /site/index.html.tmp "$1"
+    mv /site/index.html.tmp /site/index.html
+    echo "Updated page from $1"
+  refresh.sh: |
+    set -eu
+    while true; do
+      random=$(od -An -N2 -tu2 /dev/urandom | tr -d ' ')
+      delay=$((300 + random % 601))
+      echo "Waiting $delay seconds before refreshing"
+      sleep "$delay"
+      sh /scripts/download.sh https://en.wikipedia.org/wiki/Special:Random \
+        || echo "Download failed; keeping the previous page"
+    done

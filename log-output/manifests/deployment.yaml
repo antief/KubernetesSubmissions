@@ -26,7 +26,7 @@ spec:
 
       containers:
         - name: log-output-writer
-          image: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/log-output:4.1
+          image: log-output
           imagePullPolicy: IfNotPresent
           command:
             - python
@@ -39,7 +39,7 @@ spec:
               mountPath: /usr/src/app/files
 
         - name: log-output-reader
-          image: europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/log-output:4.1
+          image: log-output
           imagePullPolicy: IfNotPresent
           command:
             - python
@@ -67,7 +67,7 @@ spec:
                   key: MESSAGE
 
             - name: PING_PONG_URL
-              value: http://ping-pong-svc/pings
+              value: http://ping-pong-svc:8000/pings
 
           volumeMounts:
             - name: log-data

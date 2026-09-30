@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - manifests/configmap.yaml
+  - manifests/deployment.yaml
+  - manifests/service.yaml
+
+images:
+  - name: log-output
+    newName: ghcr.io/antief/log-output
+    newTag: "4.7"

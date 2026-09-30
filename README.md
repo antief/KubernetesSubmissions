@@ -53,3 +53,4 @@
 - [4.4](https://github.com/antief/KubernetesSubmissions/tree/4.4) ([ping-pong](https://github.com/antief/KubernetesSubmissions/tree/4.4/ping-pong))
 - [4.5](https://github.com/antief/KubernetesSubmissions/tree/4.5) ([todo-app](https://github.com/antief/KubernetesSubmissions/tree/4.5/todo-app), [todo-backend](https://github.com/antief/KubernetesSubmissions/tree/4.5/todo-backend))
 - [4.6](https://github.com/antief/KubernetesSubmissions/tree/4.6) ([todo-backend](https://github.com/antief/KubernetesSubmissions/tree/4.6/todo-backend), [broadcaster](https://github.com/antief/KubernetesSubmissions/tree/4.6/broadcaster))
+- [4.7](https://github.com/antief/KubernetesSubmissions/tree/4.7) ([log-output](https://github.com/antief/KubernetesSubmissions/tree/4.7/log-output), [argocd](https://github.com/antief/KubernetesSubmissions/tree/4.7/argocd), [workflow](https://github.com/antief/KubernetesSubmissions/tree/4.7/.github/workflows))

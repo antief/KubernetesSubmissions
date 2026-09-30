@@ -1,117 +1,53 @@
-name: Release application
+name: Log output GitOps
 
 on:
   push:
     branches:
-      - "**"
+      - main
+    paths:
+      - "log-output/**"
+      - ".github/workflows/main.yaml"
 
 permissions:
-  contents: read
-  id-token: write
-
-env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: dwk-cluster
-  GKE_ZONE: europe-north1-b
-  REGISTRY: europe-north1-docker.pkg.dev
-  REPOSITORY: dwk-images
-  TODO_APP_IMAGE: todo-app
-  TODO_BACKEND_IMAGE: todo-backend
-  TODO_APP_DEPLOYMENT: todo-app
-  TODO_BACKEND_DEPLOYMENT: todo-backend-dep
-  BRANCH: ${{ github.ref_name }}
+  contents: write
+  packages: write
 
 jobs:
-  build-publish-deploy:
-    name: Build, Publish and Deploy
+  build-publish-update:
     runs-on: ubuntu-latest
-    environment: GKE_PROJECT
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - uses: google-github-actions/auth@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
         with:
-          workload_identity_provider: "${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}"
-          service_account: "${{ secrets.SERVICE_ACCOUNT }}"
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v3
-
-      - name: Use gcloud CLI
-        run: gcloud info
-
-      - name: Configure Docker
-        run: gcloud --quiet auth configure-docker "$REGISTRY"
-
-      - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v3
-        with:
-          cluster_name: "${{ env.GKE_CLUSTER }}"
-          project_id: "${{ env.PROJECT_ID }}"
-          location: "${{ env.GKE_ZONE }}"
-
-      - name: Select namespace
+      - name: Build and push
+        env:
+          IMAGE: ghcr.io/antief/log-output
         run: |
-          if [[ "$BRANCH" == "main" ]]; then
-            echo "NAMESPACE=project" >> "$GITHUB_ENV"
-          else
-            echo "NAMESPACE=$BRANCH" >> "$GITHUB_ENV"
-          fi
+          docker build \
+            --tag "$IMAGE:$GITHUB_SHA" \
+            ./log-output
 
-      - name: Form image names
-        run: |
-          echo "TODO_APP_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/$TODO_APP_IMAGE:$BRANCH-$GITHUB_SHA" >> "$GITHUB_ENV"
-          echo "TODO_BACKEND_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/$TODO_BACKEND_IMAGE:$BRANCH-$GITHUB_SHA" >> "$GITHUB_ENV"
-
-      - name: Build
-        run: |
-          docker build --tag "$TODO_APP_TAG" ./todo-app
-          docker build --tag "$TODO_BACKEND_TAG" ./todo-backend
-
-      - name: Publish
-        run: |
-          docker push "$TODO_APP_TAG"
-          docker push "$TODO_BACKEND_TAG"
+          docker push "$IMAGE:$GITHUB_SHA"
 
       - name: Set up Kustomize
         uses: imranismail/setup-kustomize@v3
 
-      - name: Deploy
-        env:
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      - name: Update image
+        working-directory: log-output
         run: |
-          kubectl create namespace "$NAMESPACE" \
-            --dry-run=client \
-            --output yaml \
-            | kubectl apply -f -
+          kustomize edit set image \
+            log-output=ghcr.io/antief/log-output:$GITHUB_SHA
 
-          kubectl config set-context \
-            --current \
-            --namespace="$NAMESPACE"
-
-          kubectl create secret generic todo-postgres-secret \
-            --namespace "$NAMESPACE" \
-            --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
-            --dry-run=client \
-            --output yaml \
-            | kubectl apply -f -
-
-          kustomize edit set namespace "$NAMESPACE"
-          kustomize edit set image todo-app="$TODO_APP_TAG"
-          kustomize edit set image todo-backend="$TODO_BACKEND_TAG"
-
-          kustomize build . | kubectl apply -f -
-
-          kubectl rollout status deployment "$TODO_BACKEND_DEPLOYMENT" \
-            --namespace "$NAMESPACE" \
-            --timeout=300s
-
-          kubectl rollout status deployment "$TODO_APP_DEPLOYMENT" \
-            --namespace "$NAMESPACE" \
-            --timeout=300s
-
-          kubectl get services \
-            --namespace "$NAMESPACE" \
-            --output wide
+      - name: Commit deployment update
+        uses: EndBug/add-and-commit@v10
+        with:
+          add: log-output/kustomization.yaml
+          message: "chore: update log-output image"

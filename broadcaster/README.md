@@ -20,9 +20,11 @@ helm upgrade --install my-nats nats/nats \
 
 ## Webhook secret
 
-The production webhook URL is stored in a SOPS-encrypted Kubernetes Secret. Staging needs no webhook credential.
+The production webhook URL is stored in a SOPS-encrypted Kubernetes Secret in [KubernetesProjectConfig](https://github.com/antief/KubernetesProjectConfig). Staging needs no webhook credential.
 
 ```bash
+cd ../KubernetesProjectConfig
+
 export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
 
 sops --decrypt \

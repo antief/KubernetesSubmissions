@@ -8,9 +8,9 @@ PostgreSQL runs as a single-replica StatefulSet. Database settings are provided 
 
 ## Secrets and deployment
 
-The staging and production overlays deploy the backend, PostgreSQL and CronJobs through Argo CD. See the Todo app README for GitOps setup.
+The [configuration repository](https://github.com/antief/KubernetesProjectConfig) staging and production overlays deploy the backend, PostgreSQL and CronJobs through Argo CD. See the Todo app README for GitOps setup.
 
-Provision the database Secret in each environment before synchronization:
+From the configuration repository, provision the database Secret in each environment before synchronization:
 
 ```bash
 export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
@@ -22,7 +22,7 @@ for namespace in staging production; do
 done
 ```
 
-Production backups are stored in the `todo-backups` PVC. These local volumes survive Pod restarts but do not protect against loss of the cluster or host. The standalone `manifests/backup-cronjob.yaml` provides the GCS variant and requires a `storage-sa-key` Secret containing `key.json` and an enabled Google Cloud billing account.
+Production backups are stored in the `todo-backups` PVC. These local volumes survive Pod restarts but do not protect against loss of the cluster or host. The standalone [GCS backup manifest](https://github.com/antief/KubernetesProjectConfig/blob/main/todo-backend/manifests/backup-cronjob.yaml) provides the GCS variant and requires a `storage-sa-key` Secret containing `key.json` and an enabled Google Cloud billing account.
 
 ## Exercise 3.9: DBaaS vs DIY
 

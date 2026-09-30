@@ -12,19 +12,7 @@ Runtime URLs, ports, paths and timeout values are passed to the Pod as environme
 
 GitHub Actions publishes the Todo app, backend and broadcaster to GHCR. Each commit to `main` updates the staging overlay; each tag builds that revision and updates the `production-release` branch. Argo CD synchronizes staging from `main` and production from `production-release`. The workflow can also be run manually for either environment.
 
-Create the environment namespaces:
-
-```bash
-kubectl apply -f overlays/staging/namespace.yaml
-kubectl apply -f overlays/production/namespace.yaml
-```
-
-Provision NATS and the secrets described in the backend and broadcaster READMEs, then register the applications:
-
-```bash
-kubectl apply -n argocd -f argocd/project-staging-application.yaml
-kubectl apply -n argocd -f argocd/project-production-application.yaml
-```
+Manifests and overlays are maintained in [KubernetesProjectConfig](https://github.com/antief/KubernetesProjectConfig). Clone that repository and follow its setup instructions. The source workflow requires a `CONFIG_REPO_TOKEN` repository secret with write access to the configuration repository.
 
 Both environments use separate dynamically provisioned volumes and NATS subjects. Staging broadcasts are logged locally and its database is not backed up. Production forwards broadcasts to the webhook and backs up PostgreSQL daily.
 

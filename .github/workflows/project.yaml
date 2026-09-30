@@ -18,7 +18,7 @@ on:
           - production
 
 permissions:
-  contents: write
+  contents: read
   packages: write
 
 concurrency:
@@ -69,17 +69,24 @@ jobs:
       - name: Set up Kustomize
         uses: imranismail/setup-kustomize@v3
 
+      - name: Checkout configuration
+        uses: actions/checkout@v6
+        with:
+          repository: antief/KubernetesProjectConfig
+          token: ${{ secrets.CONFIG_REPO_TOKEN }}
+          path: configuration
+          fetch-depth: 0
+
       - name: Update images
+        working-directory: configuration
         run: |
-          git fetch origin main
           if [ "$DEPLOY_ENVIRONMENT" = staging ]; then
-            git checkout -B main origin/main
+            git checkout main
           elif git ls-remote --exit-code --heads origin production-release > /dev/null; then
-            git fetch origin production-release
-            git checkout -B production-release origin/production-release
-            git restore --source "$GITHUB_SHA" --staged --worktree -- .
+            git checkout production-release
+            git restore --source origin/main --staged --worktree -- .
           else
-            git checkout -b production-release "$GITHUB_SHA"
+            git checkout -b production-release origin/main
           fi
           cd "overlays/$DEPLOY_ENVIRONMENT"
           kustomize edit set image \
@@ -88,6 +95,7 @@ jobs:
             ghcr.io/antief/broadcaster=ghcr.io/antief/broadcaster:$GITHUB_SHA
 
       - name: Commit deployment update
+        working-directory: configuration
         run: |
           git status --short --untracked-files=all
           git diff HEAD --check

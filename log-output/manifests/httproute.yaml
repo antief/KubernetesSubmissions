@@ -15,12 +15,13 @@ spec:
       filters:
         - type: URLRewrite
           urlRewrite:
+            hostname: ping-pong.exercises.svc.cluster.local
             path:
               type: ReplacePrefixMatch
               replacePrefixMatch: /
       backendRefs:
-        - name: ping-pong-svc
-          port: 8000
+        - name: ping-pong
+          port: 80
 
     - matches:
         - path:

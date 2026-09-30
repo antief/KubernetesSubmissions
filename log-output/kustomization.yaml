@@ -10,6 +10,7 @@ resources:
 - manifests/greeter.yaml
 - manifests/greeter-route.yaml
 - manifests/waypoint.yaml
+- ../ping-pong
 
 images:
 - name: greeter-v1
@@ -21,3 +22,6 @@ images:
 - name: log-output
   newName: ghcr.io/antief/log-output
   newTag: 37ba5f74d95bb13692c892ce2b4bea768d154c97
+- name: ping-pong
+  newName: dev.local/ping-pong
+  newTag: "5.7"

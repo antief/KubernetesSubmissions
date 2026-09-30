@@ -19,7 +19,7 @@ MESSAGE = os.environ["MESSAGE"]
 
 PING_PONG_URL = os.getenv(
     "PING_PONG_URL",
-    "http://ping-pong-svc:8000/pings",
+    "http://ping-pong.exercises.svc.cluster.local/pings",
 )
 
 GREETER_URL = os.getenv("GREETER_URL", "http://greeter-svc:8000/")
@@ -46,7 +46,7 @@ def information_file_content() -> str:
 
 
 def ping_pong_count() -> int:
-    with urlopen(PING_PONG_URL, timeout=5) as response:
+    with urlopen(PING_PONG_URL, timeout=30) as response:
         return int(response.read().decode("utf-8").strip())
 
 
@@ -58,7 +58,6 @@ def greeting() -> str:
 @app.get("/healthz", response_class=PlainTextResponse)
 def healthz() -> str:
     try:
-        ping_pong_count()
         greeting()
     except (OSError, ValueError) as error:
         raise HTTPException(

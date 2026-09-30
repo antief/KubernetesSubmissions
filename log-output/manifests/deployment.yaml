@@ -71,7 +71,7 @@ spec:
               value: http://greeter-svc:8000/
 
             - name: PING_PONG_URL
-              value: http://ping-pong-svc:8000/pings
+              value: http://ping-pong.exercises.svc.cluster.local/pings
 
           volumeMounts:
             - name: log-data

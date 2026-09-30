@@ -6,110 +6,46 @@ Provides three HTTP endpoints:
 - `GET /pings` returns the current counter without modifying it.
 - `GET /healthz` succeeds when the database connection works.
 
-The counter is stored in PostgreSQL.
+The application runs as a Knative Service in the `exercises` namespace. Knative supplies `PORT`, creates revisions, and scales the application to zero when idle. PostgreSQL retains the counter in its existing single-replica StatefulSet and persistent volume.
 
-PostgreSQL runs as a single-replica StatefulSet using the cluster's default StorageClass. The application is managed by an Argo Rollout in the `exercises` namespace. Canary updates use the `ping-pong-cpu` AnalysisTemplate to check the five-minute CPU usage rate sum for containers in the namespace through Prometheus. The normal success threshold is `0.1`.
+## Deploy
 
-## Build
-
-```bash
-docker build \
-  -t europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:4.1 \
-  .
-```
-
-## Deploy to k3d
-
-Argo Rollouts and Prometheus must already be installed in the cluster.
-
-From the repository root:
+Knative Serving and Kourier must already be installed. For a new installation, create the database from `manifests/postgres.yaml`:
 
 ```bash
 kubectl apply -f namespaces/exercises.yaml
-
-docker build \
-  -t europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:4.1 \
-  ./ping-pong
-
-docker pull docker.io/library/postgres:18.0
-
-k3d image import \
-  europe-north1-docker.pkg.dev/dwk-gke-antti-6c49/dwk-images/ping-pong:4.1 \
-  docker.io/library/postgres:18.0 \
-  -c k3s-default
-
-kubectl apply \
-  -f ping-pong/manifests/postgres.yaml
-
-kubectl rollout status \
-  statefulset/ping-pong-postgres \
-  -n exercises
-
-kubectl apply \
-  -f ping-pong/manifests/analysistemplate.yaml \
-  -f ping-pong/manifests/deployment.yaml \
-  -f ping-pong/manifests/service.yaml
-
-kubectl wait \
-  --for=condition=Available \
-  rollout/ping-pong-dep \
-  -n exercises \
-  --timeout=2m
+kubectl create -f ping-pong/manifests/postgres.yaml
+kubectl rollout status statefulset/ping-pong-postgres -n exercises
 ```
 
-Inspect the resources:
+The Log output GitOps workflow builds and publishes the Ping-pong image alongside Log output and Greeter. Its Kustomization includes the Knative Service, and Argo CD synchronizes it. Log output calls `http://ping-pong.exercises.svc.cluster.local/pings`; its readiness probe does not call Ping-pong, allowing idle scale-to-zero.
+
+## Validate
 
 ```bash
-kubectl get rollout,analysistemplate,statefulset,pods,services,pvc \
-  -n exercises
+kubectl wait --for=condition=Ready ksvc/ping-pong -n exercises --timeout=2m
+kubectl get ksvc,revision,pods -n exercises -l serving.knative.dev/service=ping-pong
+kubectl get ksvc ping-pong -n exercises
 ```
 
-Test the endpoint:
+The Log output Istio gateway rewrites `/pingpong` to `/` and sets the fully qualified Knative service hostname:
 
 ```bash
-kubectl port-forward \
-  -n exercises \
-  service/ping-pong-svc \
-  8081:80
+kubectl port-forward -n exercises service/log-output-gateway-istio 8082:80
 ```
 
 In another terminal:
 
 ```bash
-curl --fail --show-error http://localhost:8081/
+curl --fail --show-error --max-time 30 http://localhost:8082/pingpong
+curl --fail --show-error --max-time 30 http://localhost:8082/
 ```
+
+After requests stop, the revision Deployment reaches zero replicas. A new request starts it again, while the database counter persists.
 
 Inspect the stored counter:
 
 ```bash
-kubectl exec \
-  -n exercises \
-  ping-pong-postgres-0 \
-  -- psql \
-    -U pingpong \
-    -d pingpong \
-    -c 'SELECT * FROM ping_pong_counter;'
+kubectl exec -n exercises ping-pong-postgres-0 -- \
+  psql -U pingpong -d pingpong -c 'SELECT * FROM ping_pong_counter;'
 ```
-
-## Deploy to GKE
-
-The cluster must have Argo Rollouts and Prometheus installed. Prometheus is
-available to the AnalysisTemplate through
-`prom-prometheus-server.monitoring.svc.cluster.local`.
-
-From the repository root:
-
-    kubectl apply \
-      -f ping-pong/manifests/postgres.yaml \
-      -f ping-pong/manifests/analysistemplate.yaml \
-      -f ping-pong/manifests/deployment.yaml \
-      -f ping-pong/manifests/service.yaml
-
-    kubectl wait \
-      --for=condition=Available \
-      rollout/ping-pong-dep \
-      -n exercises \
-      --timeout=2m
-
-Ping-pong remains exposed at `/pingpong` through the Gateway and HTTPRoute
-defined under `log-output/manifests/`.

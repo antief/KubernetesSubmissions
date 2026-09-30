@@ -63,3 +63,4 @@
 - [5.1](https://github.com/antief/KubernetesSubmissions/tree/5.1/dummy-site)
 - [5.3](https://github.com/antief/KubernetesSubmissions/tree/5.3) ([log-output](https://github.com/antief/KubernetesSubmissions/tree/5.3/log-output), [greeter](https://github.com/antief/KubernetesSubmissions/tree/5.3/greeter))
 - [5.4](https://github.com/antief/KubernetesSubmissions/tree/5.4/wikipedia)
+- [5.7](https://github.com/antief/KubernetesSubmissions/tree/5.7) ([ping-pong](https://github.com/antief/KubernetesSubmissions/tree/5.7/ping-pong), [log-output](https://github.com/antief/KubernetesSubmissions/tree/5.7/log-output), [workflow](https://github.com/antief/KubernetesSubmissions/tree/5.7/.github/workflows))
